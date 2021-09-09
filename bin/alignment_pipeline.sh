@@ -13,7 +13,7 @@ platform_unit=$(zcat "$fq1" | head -n 1 | cut -f 1-4 -d":" | sed 's/@//' | sed '
 sm=$(zcat "$fq1" | head -n 1 | grep -Eo "[ATGCN+]+$")
 
 
-bwa mem -t 6 -v 3 \
+bwa mem -K 100000000 -v 3 -t 4 -Y \
     -R $(echo "@RG\tID:$id\tSM:$id"_"$sm\tLB:$id"_"$sm\tPU:$platform_unit\tPL:ILLUMINA") \
     "$reference" \
     "$fq1" "$fq2" | samtools sort -o algn.bam -

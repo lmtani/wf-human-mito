@@ -1,5 +1,5 @@
 process BWA_ALIGN {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
 
     input:
         tuple \
@@ -26,9 +26,8 @@ process BWA_ALIGN {
     """
 }
 
-
 process COLLECT_WGS_METRICS {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
 
     input:
         path bam
@@ -50,12 +49,13 @@ process COLLECT_WGS_METRICS {
         USE_FAST_ALGORITHM=true \
         READ_LENGTH=${readLen} \
         INCLUDE_BQ_HISTOGRAM=true \
+        COVERAGE_CAP=100000 \
         THEORETICAL_SENSITIVITY_OUTPUT=${sample_id}.theoretical_sensitivity.txt
     """
 }
 
 process CALL_MUTECT {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
 
     input:
         path bam
@@ -88,7 +88,7 @@ process CALL_MUTECT {
 
 
 process MERGE_STATS {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
 
     input:
         path shifted_stats
@@ -108,7 +108,7 @@ process MERGE_STATS {
 
 
 process LIFTOVER_AND_COMBINE_VCFS {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
     input:
         path shifted_vcf
         path vcf
@@ -139,7 +139,7 @@ process LIFTOVER_AND_COMBINE_VCFS {
 }
 
 process FILTER {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
     input:
         path mito_fasta
         path mito_index
@@ -174,16 +174,18 @@ process FILTER {
 }
 
 process SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
     input:
         path mito_fasta
         path mito_index
         path mito_dict
         path filtered_vcf
         path filtered_vcf_index
+        val sample_id
 
     output:
-        path "splitAndPassOnly.vcf"
+        path "${sample_id}.pass.vcf.gz", emit: vcf
+        path "${sample_id}.pass.vcf.gz.tbi", emit: tbi
 
     script:
     """
@@ -197,7 +199,7 @@ process SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES {
 
       gatk SelectVariants \
         -V split.vcf \
-        -O splitAndPassOnly.vcf \
+        -O ${sample_id}.pass.vcf.gz \
         --exclude-filtered
     """
 }
@@ -220,3 +222,18 @@ process GET_CONTAMINATION {
     """
 }
 
+process CREATE_TABLE {
+    label "human_mito"
+    input:
+        file minor_hg
+        file major_hg
+
+    output:
+        path "teste"
+
+    script:
+    minor = minor_hg.getText()
+    """
+    echo "$minor_hg,$major_hg" > teste
+    """
+}

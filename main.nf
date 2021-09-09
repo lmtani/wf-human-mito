@@ -11,15 +11,15 @@
 //        as an entry point when using this workflow in isolation.
 
 nextflow.enable.dsl = 2
-params.threads = 2
+
 
 include { 
     BWA_ALIGN as ALIGN_STANDARD_MITO;
     BWA_ALIGN as ALIGN_SHIFTED_MITO;
     COLLECT_WGS_METRICS;
+    CREATE_TABLE;
     GET_CONTAMINATION;
     FILTER as INITIAL_FILTER;
-    FILTER as FILTER_CONTAMINATION;
     LIFTOVER_AND_COMBINE_VCFS;
     CALL_MUTECT as CALL_MUTECT_STANDARD;
     CALL_MUTECT as CALL_MUTECT_SHIFTED;
@@ -28,55 +28,15 @@ include {
 
 def helpMessage(){
     log.info """
-Cas9 Targeted Sequencing Workflow'
+Human Mitochondrial Analysis Workflow'
 
 Usage:
-    nextflow run epi2melabs/wf-cas9 [options]
+    nextflow run lmtani/wf-human-mito [options]
 
 Script Options:
-    --fastq        DIR     Path to FASTQ directory (required)
-    --reference    FILE    Reference genome in fasta format (required)
-    --targets      FILE    BED file with target intervals (required)
-    --sample       STR     Name of the sample (required)
+    --fastq        DIR     Path to FASTQ directory. Ex: "/path/to/fastqs/*_R{1,2}*.fastq.gz" (required)
     --out_dir      DIR     Path for output (default: $params.out_dir)
 """
-}
-
-
-process getVersions {
-    label "wfcas9"
-    cpus 1
-    output:
-        path "versions.txt"
-    script:
-    """
-    python -c "import pysam; print(f'pysam,{pysam.__version__}')" >> versions.txt
-    python -c "import aplanat; print(f'aplanat,{aplanat.__version__}')" >> versions.txt
-    python -c "import pyranges; print(f'pyranges,{pyranges.__version__}')" >> versions.txt
-    python -c "import pandas; print(f'pandas,{pandas.__version__}')" >> versions.txt
-    python -c "import bokeh; print(f'bokeh,{bokeh.__version__}')" >> versions.txt
-    minimap2 --version | sed 's/^/minimap2,/' >> versions.txt
-    samtools --version | head -n 1 | sed 's/ /,/' >> versions.txt
-    """
-}
-
-
-process makeReport {
-    label "wfcas9"
-    input:
-        file targets
-        file algn_summaries
-        file reference
-        path "versions/*"
-    output:
-        path "cas9-target-sequencing-report.html"
-    """
-    report.py cas9-target-sequencing-report.html \
-        --versions versions \
-        --targets $targets \
-        --align-stats $algn_summaries \
-        --reference $reference
-    """
 }
 
 
@@ -95,7 +55,6 @@ process output {
     echo "Writing output files"
     """
 }
-
 
 
 // entrypoint workflow
@@ -225,24 +184,15 @@ workflow {
         mito_index,
         mito_dict,
         INITIAL_FILTER.out.vcf,
-        INITIAL_FILTER.out.tbi
+        INITIAL_FILTER.out.tbi,
+        ALIGN_STANDARD_MITO.out.sample_id
     )
 
     GET_CONTAMINATION(
-        SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out
+        SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out.vcf
     )
 
-    // FILTER_CONTAMINATION(
-    //     mito_fasta,
-    //     mito_index,
-    //     mito_dict,
-    //     LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf,
-    //     LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf_idx,
-    //     MERGE_STATS.out,
-    //     "filtered.vcf.gz",
-    //     blacklist,
-    //     blacklist_index
-    // )
+    // CREATE_TABLE(GET_CONTAMINATION.out.minor_hg, GET_CONTAMINATION.out.major_hg)
 
     output(
         ALIGN_STANDARD_MITO.out.bam.concat(
@@ -251,12 +201,18 @@ workflow {
             COLLECT_WGS_METRICS.out.sensitivity,
             COLLECT_WGS_METRICS.out.metrics,
             LIFTOVER_AND_COMBINE_VCFS.out.rejected,
-            LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf,
-            LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf_idx,
+            SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out.vcf,
+            SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out.tbi,
+            INITIAL_FILTER.out.vcf,
+            INITIAL_FILTER.out.tbi,
             MERGE_STATS.out,
             GET_CONTAMINATION.out.major_hg,
+            GET_CONTAMINATION.out.minor_hg,
+            LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf,
+            // CREATE_TABLE.out,
+            GET_CONTAMINATION.out.major_level,
+            GET_CONTAMINATION.out.minor_level,
             GET_CONTAMINATION.out.contamination_file
         )
     )
-
 }
