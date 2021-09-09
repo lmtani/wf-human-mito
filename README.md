@@ -17,7 +17,6 @@ The workflow can currently be run using either
 the required software. Both methods are automated out-of-the-box provided
 either docker or conda is installed.
 
-Reference files are also needed and can be downloaded from (future-link). Save it inside the data/ directory of this repository.
 
 **Workflow options**
 

@@ -11,72 +11,36 @@
 //        as an entry point when using this workflow in isolation.
 
 nextflow.enable.dsl = 2
-params.threads = 2
+
 
 include { 
     BWA_ALIGN as ALIGN_STANDARD_MITO;
     BWA_ALIGN as ALIGN_SHIFTED_MITO;
     COLLECT_WGS_METRICS;
+    CREATE_TABLE;
+    BWA_ALIGN_FROM_UBAM;
+    SELECT_MITO_READS;
     GET_CONTAMINATION;
     FILTER as INITIAL_FILTER;
-    FILTER as FILTER_CONTAMINATION;
     LIFTOVER_AND_COMBINE_VCFS;
     CALL_MUTECT as CALL_MUTECT_STANDARD;
     CALL_MUTECT as CALL_MUTECT_SHIFTED;
     SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES;
+    FASTQ_TO_UBAM;
     MERGE_STATS} from './lib/align_and_call'
 
 def helpMessage(){
     log.info """
-Cas9 Targeted Sequencing Workflow'
+Human Mitochondrial Analysis Workflow'
 
 Usage:
-    nextflow run epi2melabs/wf-cas9 [options]
+    nextflow run lmtani/wf-human-mito [options]
 
 Script Options:
-    --fastq        DIR     Path to FASTQ directory (required)
-    --reference    FILE    Reference genome in fasta format (required)
-    --targets      FILE    BED file with target intervals (required)
-    --sample       STR     Name of the sample (required)
+    --fastq        DIR     Path to FASTQ directory. Quote is required. Ex: "/path/to/fastqs/*_R{1,2}*.fastq.gz" (required)
+    --reference    Dir     Path to reference (GRCh38). BWA index need to be in same directory (required)
     --out_dir      DIR     Path for output (default: $params.out_dir)
 """
-}
-
-
-process getVersions {
-    label "wfcas9"
-    cpus 1
-    output:
-        path "versions.txt"
-    script:
-    """
-    python -c "import pysam; print(f'pysam,{pysam.__version__}')" >> versions.txt
-    python -c "import aplanat; print(f'aplanat,{aplanat.__version__}')" >> versions.txt
-    python -c "import pyranges; print(f'pyranges,{pyranges.__version__}')" >> versions.txt
-    python -c "import pandas; print(f'pandas,{pandas.__version__}')" >> versions.txt
-    python -c "import bokeh; print(f'bokeh,{bokeh.__version__}')" >> versions.txt
-    minimap2 --version | sed 's/^/minimap2,/' >> versions.txt
-    samtools --version | head -n 1 | sed 's/ /,/' >> versions.txt
-    """
-}
-
-
-process makeReport {
-    label "wfcas9"
-    input:
-        file targets
-        file algn_summaries
-        file reference
-        path "versions/*"
-    output:
-        path "cas9-target-sequencing-report.html"
-    """
-    report.py cas9-target-sequencing-report.html \
-        --versions versions \
-        --targets $targets \
-        --align-stats $algn_summaries \
-        --reference $reference
-    """
 }
 
 
@@ -85,7 +49,7 @@ process makeReport {
 // decoupling the publish from the process steps.
 process output {
     // publish inputs to output directory
-    label "wfcas9"
+    label "human_mito"
     publishDir "${params.out_dir}", mode: 'copy', pattern: "*"
     input:
         path fname
@@ -95,7 +59,6 @@ process output {
     echo "Writing output files"
     """
 }
-
 
 
 // entrypoint workflow
@@ -112,6 +75,18 @@ workflow {
         println("`--fastq` is required")
         exit 1
     }
+
+    // Human Reference
+    human_fasta = file("${params.reference}", type:'file', checkIfExists:true)
+    human_dict = file("${human_fasta.getParent()}/${human_fasta.baseName}.dict", type:'file', checkIfExists:true)
+    human_index = file("${params.reference}.fai", type:'file', checkIfExists:true)
+    human_amb = file("${params.reference}.64.amb", type:'file', checkIfExists:true)
+    human_ann = file("${params.reference}.64.ann", type:'file', checkIfExists:true)
+    human_bwt = file("${params.reference}.64.bwt", type:'file', checkIfExists:true)
+    human_sa = file("${params.reference}.64.sa", type:'file', checkIfExists:true)
+    human_pac = file("${params.reference}.64.pac", type:'file', checkIfExists:true)
+    human_alt = file("${params.reference}.64.alt", type:'file', checkIfExists:true)
+
 
     // Reference files - stored in github
     blacklist = file("$baseDir/data/blacklist_sites.hg38.chrM.bed", type:'file', checkIfExists:true)
@@ -138,8 +113,34 @@ workflow {
 
     reads = Channel.fromFilePairs("${params.fastq}", glob: true)
 
+    FASTQ_TO_UBAM(reads)
+
+    BWA_ALIGN_FROM_UBAM(
+        FASTQ_TO_UBAM.out.sample_id,
+        FASTQ_TO_UBAM.out.ubam,
+        human_fasta,
+        human_dict,
+        human_index,
+        human_amb,
+        human_ann,
+        human_bwt,
+        human_pac,
+        human_sa,
+        human_alt
+    )
+
+    SELECT_MITO_READS(
+        FASTQ_TO_UBAM.out.sample_id,
+        BWA_ALIGN_FROM_UBAM.out.bam,
+        BWA_ALIGN_FROM_UBAM.out.bai,
+        human_fasta,
+        human_dict,
+        human_index,
+    )
+
     ALIGN_STANDARD_MITO(
-        reads,
+        SELECT_MITO_READS.out.ubam,
+        FASTQ_TO_UBAM.out.sample_id,
         mito_fasta,
         mito_dict,
         mito_index,
@@ -151,7 +152,8 @@ workflow {
     )
 
     ALIGN_SHIFTED_MITO(
-        reads,
+        SELECT_MITO_READS.out.ubam,
+        FASTQ_TO_UBAM.out.sample_id,
         shifted_fasta,
         shifted_dict,
         shifted_index,
@@ -166,7 +168,7 @@ workflow {
         ALIGN_STANDARD_MITO.out.bam,
         ALIGN_STANDARD_MITO.out.bai,
         mito_fasta,
-        ALIGN_STANDARD_MITO.out.sample_id,
+        FASTQ_TO_UBAM.out.sample_id,
         300
     )
 
@@ -178,7 +180,7 @@ workflow {
         mito_dict,
         mito_index,
         "standard",
-        ALIGN_STANDARD_MITO.out.sample_id,
+        FASTQ_TO_UBAM.out.sample_id,
         " -L chrM:576-16024 "
     )
 
@@ -189,14 +191,14 @@ workflow {
         shifted_dict,
         shifted_index,
         "shifted",
-        ALIGN_SHIFTED_MITO.out.sample_id,
+        FASTQ_TO_UBAM.out.sample_id,
         " -L chrM:8025-9144 "  
     )
 
     LIFTOVER_AND_COMBINE_VCFS(
         CALL_MUTECT_SHIFTED.out.vcf,
         CALL_MUTECT_STANDARD.out.vcf,
-        ALIGN_STANDARD_MITO.out.sample_id,
+        FASTQ_TO_UBAM.out.sample_id,
         mito_fasta,
         mito_index,
         mito_dict,
@@ -215,7 +217,7 @@ workflow {
         LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf,
         LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf_idx,
         MERGE_STATS.out,
-        ALIGN_STANDARD_MITO.out.sample_id,
+        FASTQ_TO_UBAM.out.sample_id,
         blacklist,
         blacklist_index
     )
@@ -225,38 +227,40 @@ workflow {
         mito_index,
         mito_dict,
         INITIAL_FILTER.out.vcf,
-        INITIAL_FILTER.out.tbi
+        INITIAL_FILTER.out.tbi,
+        FASTQ_TO_UBAM.out.sample_id,
     )
 
     GET_CONTAMINATION(
-        SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out
+        SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out.vcf
     )
 
-    // FILTER_CONTAMINATION(
-    //     mito_fasta,
-    //     mito_index,
-    //     mito_dict,
-    //     LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf,
-    //     LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf_idx,
-    //     MERGE_STATS.out,
-    //     "filtered.vcf.gz",
-    //     blacklist,
-    //     blacklist_index
-    // )
+    CREATE_TABLE(
+        ALIGN_STANDARD_MITO.out.metrics,
+        COLLECT_WGS_METRICS.out.metrics,
+        GET_CONTAMINATION.out.contamination_file,
+        FASTQ_TO_UBAM.out.sample_id
+    )
 
     output(
         ALIGN_STANDARD_MITO.out.bam.concat(
             ALIGN_STANDARD_MITO.out.bai, 
-            ALIGN_STANDARD_MITO.out.metrics,
-            COLLECT_WGS_METRICS.out.sensitivity,
-            COLLECT_WGS_METRICS.out.metrics,
+            // ALIGN_STANDARD_MITO.out.metrics,
+            // COLLECT_WGS_METRICS.out.sensitivity,
+            // COLLECT_WGS_METRICS.out.metrics,
             LIFTOVER_AND_COMBINE_VCFS.out.rejected,
-            LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf,
-            LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf_idx,
-            MERGE_STATS.out,
-            GET_CONTAMINATION.out.major_hg,
-            GET_CONTAMINATION.out.contamination_file
+            // SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out.vcf,
+            // SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out.tbi,
+            INITIAL_FILTER.out.vcf,
+            INITIAL_FILTER.out.tbi,
+            // MERGE_STATS.out,
+            // GET_CONTAMINATION.out.major_hg,
+            // GET_CONTAMINATION.out.minor_hg,
+            // LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf,
+            CREATE_TABLE.out,
+            // GET_CONTAMINATION.out.major_level,
+            // GET_CONTAMINATION.out.minor_level,
+            // GET_CONTAMINATION.out.contamination_file
         )
     )
-
 }

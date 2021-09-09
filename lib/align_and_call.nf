@@ -1,10 +1,124 @@
-process BWA_ALIGN {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+process FASTQ_TO_UBAM {
+    label "human_mito"
 
     input:
         tuple \
             val(sampleId), \
             path(reads)
+        
+    output:
+        path "${sampleId}.unmaped.bam", emit: ubam
+        val "$sampleId", emit: sample_id
+    shell:
+    """
+    fastq_to_ubam.sh ${reads[0]} ${reads[1]} ${sampleId}
+    """
+}
+
+
+process SELECT_MITO_READS {
+    label "human_mito"
+
+    input:
+        val sample_id
+        path whole_bam
+        path whole_bai
+        path fasta
+        path dict
+        path index
+
+    output:
+        path "${sample_id}.mito.unaligned.bam", emit: ubam
+
+    script:
+    """
+    gatk PrintReads \
+        -R $fasta \
+        -L "chrM" \
+        --read-filter MateOnSameContigOrNoMappedMateReadFilter \
+        --read-filter MateUnmappedAndUnmappedReadFilter \
+        -I $whole_bam \
+        -O mito.bam
+
+    picard RevertSam \
+        INPUT=mito.bam \
+        OUTPUT_BY_READGROUP=false \
+        OUTPUT=${sample_id}.mito.unaligned.bam \
+        VALIDATION_STRINGENCY=LENIENT \
+        ATTRIBUTE_TO_CLEAR=FT \
+        ATTRIBUTE_TO_CLEAR=CO \
+        SORT_ORDER=queryname \
+        RESTORE_ORIGINAL_QUALITIES=false
+    """
+}
+
+
+process BWA_ALIGN_FROM_UBAM {
+    label "human_mito"
+
+    input:
+        val sample_id
+        path ubam
+        path fasta
+        path dict
+        path index
+        path amb
+        path ann
+        path bwt
+        path pac
+        path sa
+        path ref_alt
+    output:
+        path "${sample_id}.sorted.bam", emit: bam
+        path "${sample_id}.sorted.bai", emit: bai
+
+    
+    shell:
+    """
+    picard SamToFastq \
+            INPUT=!{ubam} \
+            FASTQ=/dev/stdout \
+            INTERLEAVE=true \
+            NON_PF=true | \
+        bwa mem -K 100000000 -p -v 3 -t 5 -Y !{fasta} /dev/stdin - 2> >(tee !{sample_id}.bwa.stderr.log >&2) | \
+        picard MergeBamAlignment \
+            VALIDATION_STRINGENCY=SILENT \
+            EXPECTED_ORIENTATIONS=FR \
+            ATTRIBUTES_TO_RETAIN=X0 \
+            ATTRIBUTES_TO_REMOVE=NM \
+            ATTRIBUTES_TO_REMOVE=MD \
+            ALIGNED_BAM=/dev/stdin \
+            UNMAPPED_BAM=!{ubam} \
+            OUTPUT=!{sample_id}.temp.bam \
+            REFERENCE_SEQUENCE=!{fasta} \
+            SORT_ORDER="unsorted" \
+            IS_BISULFITE_SEQUENCE=false \
+            ALIGNED_READS_ONLY=false \
+            CLIP_ADAPTERS=false \
+            MAX_RECORDS_IN_RAM=2000000 \
+            ADD_MATE_CIGAR=true \
+            MAX_INSERTIONS_OR_DELETIONS=-1 \
+            PRIMARY_ALIGNMENT_STRATEGY=MostDistant \
+            UNMAPPED_READ_STRATEGY=COPY_TO_TAG \
+            ALIGNER_PROPER_PAIR_FLAGS=true \
+            UNMAP_CONTAMINANT_READS=true \
+            ADD_PG_TAG_TO_READS=false
+
+    picard SortSam \
+        INPUT="!{sample_id}.temp.bam" \
+        OUTPUT="!{sample_id}.sorted.bam" \
+        SORT_ORDER="coordinate" \
+        CREATE_INDEX=true \
+        MAX_RECORDS_IN_RAM=300000
+    """
+}
+
+process BWA_ALIGN {
+    label "human_mito"
+
+    input:
+        path input_bam
+        val sampleId
         path mito_fasta
         path mito_dict
         path mito_index
@@ -14,21 +128,64 @@ process BWA_ALIGN {
         path mito_pac
         path mito_sa
     output:
-        val "${sampleId}", emit: sample_id
-        path "${sampleId}.sorted.bam", emit: bam
-        path "${sampleId}.sorted.bai", emit: bai
+        path "${sampleId}.bam", emit: bam
+        path "${sampleId}.bai", emit: bai
         path "${sampleId}.dup.metrics", emit: metrics
 
     
-    script:
+    shell:
     """
-    alignment_pipeline.sh ${mito_fasta} ${reads[0]} ${reads[1]} ${sampleId}
+    picard SamToFastq \
+      INPUT=!{input_bam} \
+      FASTQ=/dev/stdout \
+      INTERLEAVE=true \
+      NON_PF=true | \
+    bwa mem -K 100000000 -p -v 3 -t 2 -Y !{mito_fasta} /dev/stdin - 2> >(tee !{sampleId}.bwa.stderr.log >&2) | \
+    picard MergeBamAlignment \
+      VALIDATION_STRINGENCY=SILENT \
+      EXPECTED_ORIENTATIONS=FR \
+      ATTRIBUTES_TO_RETAIN=X0 \
+      ATTRIBUTES_TO_REMOVE=NM \
+      ATTRIBUTES_TO_REMOVE=MD \
+      ALIGNED_BAM=/dev/stdin \
+      UNMAPPED_BAM=!{input_bam} \
+      OUTPUT=mba.bam \
+      REFERENCE_SEQUENCE=!{mito_fasta} \
+      PAIRED_RUN=true \
+      SORT_ORDER="unsorted" \
+      IS_BISULFITE_SEQUENCE=false \
+      ALIGNED_READS_ONLY=false \
+      CLIP_ADAPTERS=false \
+      MAX_RECORDS_IN_RAM=2000000 \
+      ADD_MATE_CIGAR=true \
+      MAX_INSERTIONS_OR_DELETIONS=-1 \
+      PRIMARY_ALIGNMENT_STRATEGY=MostDistant \
+      UNMAPPED_READ_STRATEGY=COPY_TO_TAG \
+      ALIGNER_PROPER_PAIR_FLAGS=true \
+      UNMAP_CONTAMINANT_READS=true \
+      ADD_PG_TAG_TO_READS=false
+
+    picard MarkDuplicates \
+      INPUT=mba.bam \
+      OUTPUT=md.bam \
+      METRICS_FILE=!{sampleId}.dup.metrics \
+      VALIDATION_STRINGENCY=SILENT \
+      OPTICAL_DUPLICATE_PIXEL_DISTANCE=2500 \
+      ASSUME_SORT_ORDER="queryname" \
+      CLEAR_DT="false" \
+      ADD_PG_TAG_TO_READS=false
+
+    picard SortSam \
+      INPUT=md.bam \
+      OUTPUT=!{sampleId}.bam \
+      SORT_ORDER="coordinate" \
+      CREATE_INDEX=true \
+      MAX_RECORDS_IN_RAM=300000
     """
 }
 
-
 process COLLECT_WGS_METRICS {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
 
     input:
         path bam
@@ -50,12 +207,13 @@ process COLLECT_WGS_METRICS {
         USE_FAST_ALGORITHM=true \
         READ_LENGTH=${readLen} \
         INCLUDE_BQ_HISTOGRAM=true \
+        COVERAGE_CAP=100000 \
         THEORETICAL_SENSITIVITY_OUTPUT=${sample_id}.theoretical_sensitivity.txt
     """
 }
 
 process CALL_MUTECT {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
 
     input:
         path bam
@@ -88,7 +246,7 @@ process CALL_MUTECT {
 
 
 process MERGE_STATS {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
 
     input:
         path shifted_stats
@@ -108,7 +266,7 @@ process MERGE_STATS {
 
 
 process LIFTOVER_AND_COMBINE_VCFS {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
     input:
         path shifted_vcf
         path vcf
@@ -139,7 +297,7 @@ process LIFTOVER_AND_COMBINE_VCFS {
 }
 
 process FILTER {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
     input:
         path mito_fasta
         path mito_index
@@ -174,16 +332,18 @@ process FILTER {
 }
 
 process SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES {
-    conda "/home/taniguti/miniconda3/envs/wf-human-mito"
+    label "human_mito"
     input:
         path mito_fasta
         path mito_index
         path mito_dict
         path filtered_vcf
         path filtered_vcf_index
+        val sample_id
 
     output:
-        path "splitAndPassOnly.vcf"
+        path "${sample_id}.pass.vcf.gz", emit: vcf
+        path "${sample_id}.pass.vcf.gz.tbi", emit: tbi
 
     script:
     """
@@ -197,7 +357,7 @@ process SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES {
 
       gatk SelectVariants \
         -V split.vcf \
-        -O splitAndPassOnly.vcf \
+        -O ${sample_id}.pass.vcf.gz \
         --exclude-filtered
     """
 }
@@ -220,3 +380,20 @@ process GET_CONTAMINATION {
     """
 }
 
+process CREATE_TABLE {
+    label "human_mito"
+    input:
+        path dup_metrics
+        path wgs_metrics
+        path contam_metrics
+        val sample_id
+
+    output:
+        path "${sample_id}.summary.json"
+
+    script:
+    """
+    prepare_table.py $dup_metrics $wgs_metrics $contam_metrics
+    mv summary.json ${sample_id}.summary.json
+    """
+}
