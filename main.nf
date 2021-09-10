@@ -172,7 +172,6 @@ workflow {
         300
     )
 
-
     CALL_MUTECT_STANDARD(
         ALIGN_STANDARD_MITO.out.bam,
         ALIGN_STANDARD_MITO.out.bai,
@@ -245,22 +244,10 @@ workflow {
     output(
         ALIGN_STANDARD_MITO.out.bam.concat(
             ALIGN_STANDARD_MITO.out.bai, 
-            // ALIGN_STANDARD_MITO.out.metrics,
-            // COLLECT_WGS_METRICS.out.sensitivity,
-            // COLLECT_WGS_METRICS.out.metrics,
             LIFTOVER_AND_COMBINE_VCFS.out.rejected,
-            // SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out.vcf,
-            // SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out.tbi,
             INITIAL_FILTER.out.vcf,
             INITIAL_FILTER.out.tbi,
-            // MERGE_STATS.out,
-            // GET_CONTAMINATION.out.major_hg,
-            // GET_CONTAMINATION.out.minor_hg,
-            // LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf,
             CREATE_TABLE.out,
-            // GET_CONTAMINATION.out.major_level,
-            // GET_CONTAMINATION.out.minor_level,
-            // GET_CONTAMINATION.out.contamination_file
         )
     )
 }

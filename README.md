@@ -1,4 +1,4 @@
-# Mitochondria Workflow
+# Human Mitochondrial Workflow
 
 This repository contains a [nextflow](https://www.nextflow.io/) workflow
 for running mitochondrial analysis. This workflows is heavily inspired by the [gatk-workflows/gatk4-mitochondria-pipeline](https://github.com/gatk-workflows/gatk4-mitochondria-pipeline) and by
@@ -18,7 +18,13 @@ the required software. Both methods are automated out-of-the-box provided
 either docker or conda is installed.
 
 
-**Workflow options**
+## Inputs
+
+- Pairs of FASTQ file. One pair for each sample.
+- Reference fo human genome (GRCh38). [Files are available here](https://console.cloud.google.com/storage/browser/genomics-public-data/references/hg38/v0).
+  - .fasta, .dict, .fai, .ann, .amb, .sa, .pac, .alt
+
+## Workflow options
 
 To obtain the workflow, having installed `nextflow`, users can run:
 
@@ -28,10 +34,11 @@ nextflow run lmtani/wf-human-mito -r main --help
 
 to see the options for the workflow.
 
-**Workflow outputs**
+## Workflow outputs
 
-WIP
-
+- Alignment in BAM format
+- Variants in VCF format
+- JSON with informations, e.g: Haplotype groups (major and minor), coverage, etc.
 
 ## Useful links
 
