@@ -21,7 +21,7 @@ either docker or conda is installed.
 ## Inputs
 
 - Pairs of FASTQ file. One pair for each sample.
-- Reference fo human genome (GRCh38). [Files are available here](https://console.cloud.google.com/storage/browser/genomics-public-data/references/hg38/v0).
+- Reference for human genome (GRCh38). [Files are available here](https://console.cloud.google.com/storage/browser/genomics-public-data/references/hg38/v0).
   - .fasta, .dict, .fai, .ann, .amb, .sa, .pac, .alt
 
 ## Workflow options

@@ -14,20 +14,22 @@ nextflow.enable.dsl = 2
 
 
 include { 
-    BWA_ALIGN as ALIGN_STANDARD_MITO;
     BWA_ALIGN as ALIGN_SHIFTED_MITO;
-    COLLECT_WGS_METRICS;
-    CREATE_TABLE;
+    BWA_ALIGN as ALIGN_STANDARD_MITO;
     BWA_ALIGN_FROM_UBAM;
-    SELECT_MITO_READS;
-    GET_CONTAMINATION;
-    FILTER as INITIAL_FILTER;
-    LIFTOVER_AND_COMBINE_VCFS;
-    CALL_MUTECT as CALL_MUTECT_STANDARD;
     CALL_MUTECT as CALL_MUTECT_SHIFTED;
-    SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES;
+    CALL_MUTECT as CALL_MUTECT_STANDARD;
+    COLLECT_ALIGNMENT_METRICS;
+    COLLECT_WGS_METRICS;
+    CREATE_ALL_SAMPLES_CSV;
+    CREATE_JSON;
     FASTQ_TO_UBAM;
-    MERGE_STATS} from './lib/align_and_call'
+    FILTER as INITIAL_FILTER;
+    GET_CONTAMINATION;
+    LIFTOVER_AND_COMBINE_VCFS;
+    MERGE_STATS
+    SELECT_MITO_READS;
+    SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES} from './modules.nf'
 
 def helpMessage(){
     log.info """
@@ -76,6 +78,13 @@ workflow {
         exit 1
     }
 
+    if (!params.reference) {
+        helpMessage()
+        println("")
+        println("`--reference` is required")
+        exit 1
+    }
+
     // Human Reference
     human_fasta = file("${params.reference}", type:'file', checkIfExists:true)
     human_dict = file("${human_fasta.getParent()}/${human_fasta.baseName}.dict", type:'file', checkIfExists:true)
@@ -114,9 +123,11 @@ workflow {
     reads = Channel.fromFilePairs("${params.fastq}", glob: true)
 
     FASTQ_TO_UBAM(reads)
+    sample_id = FASTQ_TO_UBAM.out.sample_id
 
+    sample_id.subscribe { println "Pegou $it"}
     BWA_ALIGN_FROM_UBAM(
-        FASTQ_TO_UBAM.out.sample_id,
+        sample_id,
         FASTQ_TO_UBAM.out.ubam,
         human_fasta,
         human_dict,
@@ -130,7 +141,7 @@ workflow {
     )
 
     SELECT_MITO_READS(
-        FASTQ_TO_UBAM.out.sample_id,
+        sample_id,
         BWA_ALIGN_FROM_UBAM.out.bam,
         BWA_ALIGN_FROM_UBAM.out.bai,
         human_fasta,
@@ -138,9 +149,10 @@ workflow {
         human_index,
     )
 
+    ubam = SELECT_MITO_READS.out.ubam
     ALIGN_STANDARD_MITO(
-        SELECT_MITO_READS.out.ubam,
-        FASTQ_TO_UBAM.out.sample_id,
+        ubam,
+        sample_id,
         mito_fasta,
         mito_dict,
         mito_index,
@@ -152,8 +164,8 @@ workflow {
     )
 
     ALIGN_SHIFTED_MITO(
-        SELECT_MITO_READS.out.ubam,
-        FASTQ_TO_UBAM.out.sample_id,
+        ubam,
+        sample_id,
         shifted_fasta,
         shifted_dict,
         shifted_index,
@@ -164,22 +176,33 @@ workflow {
         shifted_sa
     )
 
-    COLLECT_WGS_METRICS(
-        ALIGN_STANDARD_MITO.out.bam,
-        ALIGN_STANDARD_MITO.out.bai,
+
+    alignment = ALIGN_STANDARD_MITO.out.bam
+    alignment_index = ALIGN_STANDARD_MITO.out.bai
+    COLLECT_ALIGNMENT_METRICS(
+        alignment,
+        alignment_index,
         mito_fasta,
-        FASTQ_TO_UBAM.out.sample_id,
+        mito_dict,
+        mito_index
+    )
+
+    COLLECT_WGS_METRICS(
+        alignment,
+        alignment_index,
+        mito_fasta,
+        sample_id,
         300
     )
 
     CALL_MUTECT_STANDARD(
-        ALIGN_STANDARD_MITO.out.bam,
-        ALIGN_STANDARD_MITO.out.bai,
+        alignment,
+        alignment_index,
         mito_fasta,
         mito_dict,
         mito_index,
         "standard",
-        FASTQ_TO_UBAM.out.sample_id,
+        sample_id,
         " -L chrM:576-16024 "
     )
 
@@ -190,14 +213,14 @@ workflow {
         shifted_dict,
         shifted_index,
         "shifted",
-        FASTQ_TO_UBAM.out.sample_id,
+        sample_id,
         " -L chrM:8025-9144 "  
     )
 
     LIFTOVER_AND_COMBINE_VCFS(
         CALL_MUTECT_SHIFTED.out.vcf,
         CALL_MUTECT_STANDARD.out.vcf,
-        FASTQ_TO_UBAM.out.sample_id,
+        sample_id,
         mito_fasta,
         mito_index,
         mito_dict,
@@ -216,7 +239,7 @@ workflow {
         LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf,
         LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf_idx,
         MERGE_STATS.out,
-        FASTQ_TO_UBAM.out.sample_id,
+        sample_id,
         blacklist,
         blacklist_index
     )
@@ -227,27 +250,32 @@ workflow {
         mito_dict,
         INITIAL_FILTER.out.vcf,
         INITIAL_FILTER.out.tbi,
-        FASTQ_TO_UBAM.out.sample_id,
+        sample_id,
     )
 
     GET_CONTAMINATION(
         SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out.vcf
     )
 
-    CREATE_TABLE(
+    CREATE_JSON(
         ALIGN_STANDARD_MITO.out.metrics,
         COLLECT_WGS_METRICS.out.metrics,
         GET_CONTAMINATION.out.contamination_file,
-        FASTQ_TO_UBAM.out.sample_id
+        COLLECT_ALIGNMENT_METRICS.out,
+        sample_id
     )
 
-    output(
-        ALIGN_STANDARD_MITO.out.bam.concat(
-            ALIGN_STANDARD_MITO.out.bai, 
-            LIFTOVER_AND_COMBINE_VCFS.out.rejected,
-            INITIAL_FILTER.out.vcf,
-            INITIAL_FILTER.out.tbi,
-            CREATE_TABLE.out,
-        )
+    CREATE_ALL_SAMPLES_CSV(
+        CREATE_JSON.out.collect()
     )
+
+    // output(
+    //     ALIGN_STANDARD_MITO.out.bam.concat(
+    //         ALIGN_STANDARD_MITO.out.bai, 
+    //         LIFTOVER_AND_COMBINE_VCFS.out.rejected,
+    //         INITIAL_FILTER.out.vcf,
+    //         INITIAL_FILTER.out.tbi,
+    //         CREATE_ALL_SAMPLES_CSV.out
+    //     )
+    // )
 }
