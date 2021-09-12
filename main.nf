@@ -49,7 +49,7 @@ Script Options:
 // See https://github.com/nextflow-io/nextflow/issues/1636
 // This is the only way to publish files from a workflow whilst
 // decoupling the publish from the process steps.
-process output {
+process OUTPUT {
     // publish inputs to output directory
     label "human_mito"
     publishDir "${params.out_dir}", mode: 'copy', pattern: "*"
@@ -62,6 +62,18 @@ process output {
     """
 }
 
+process OUTPUT_ALIGNMENTS {
+    label "human_mito"
+    publishDir "${params.out_dir}", mode: 'copy', pattern: "*"
+    input:
+        tuple val(sample_id), path(bam), path(bai), path(dup_metrics)
+    output:
+        path bam
+        path bai
+    """
+    echo "Writing output files"
+    """
+}
 
 workflow separate_mitochondrion {
     take: reads
@@ -79,10 +91,8 @@ workflow separate_mitochondrion {
         human_alt = file("${params.reference}.64.alt", type:'file', checkIfExists:true)
 
         FASTQ_TO_UBAM(reads)
-        sample_id = FASTQ_TO_UBAM.out.sample_id
         BWA_ALIGN_FROM_UBAM(
-            sample_id,
-            FASTQ_TO_UBAM.out.ubam,
+            FASTQ_TO_UBAM.out,
             human_fasta,
             human_dict,
             human_index,
@@ -95,23 +105,19 @@ workflow separate_mitochondrion {
         )
 
         SELECT_MITO_READS(
-            sample_id,
-            BWA_ALIGN_FROM_UBAM.out.bam,
-            BWA_ALIGN_FROM_UBAM.out.bai,
+            BWA_ALIGN_FROM_UBAM.out,
             human_fasta,
             human_dict,
             human_index,
         )
     emit:
-        ubam = SELECT_MITO_READS.out.ubam
-        sample_id = sample_id
+        SELECT_MITO_READS.out
 }
 
 
 workflow variant_call {
     take: 
-        ubam
-        sample_id
+        reads
     main:
         // Reference files - stored in github
         blacklist = file("$baseDir/data/blacklist_sites.hg38.chrM.bed", type:'file', checkIfExists:true)
@@ -137,8 +143,7 @@ workflow variant_call {
         shifted_pac = file("$baseDir/data/Homo_sapiens_assembly38.chrM.shifted_by_8000_bases.fasta.pac", type:'file', checkIfExists:true)
     
         ALIGN_STANDARD_MITO(
-                ubam,
-                sample_id,
+                reads,
                 mito_fasta,
                 mito_dict,
                 mito_index,
@@ -150,8 +155,7 @@ workflow variant_call {
         )
 
         ALIGN_SHIFTED_MITO(
-            ubam,
-            sample_id,
+            reads,
             shifted_fasta,
             shifted_dict,
             shifted_index,
@@ -162,61 +166,47 @@ workflow variant_call {
             shifted_sa
         )
 
-
-        alignment = ALIGN_STANDARD_MITO.out.bam
-        alignment_index = ALIGN_STANDARD_MITO.out.bai
         COLLECT_ALIGNMENT_METRICS(
-            alignment,
-            alignment_index,
+            ALIGN_STANDARD_MITO.out,
             mito_fasta,
             mito_dict,
             mito_index
         )
 
         COLLECT_WGS_METRICS(
-            alignment,
-            alignment_index,
+            ALIGN_STANDARD_MITO.out,
             mito_fasta,
-            sample_id,
             300
         )
 
         CALL_MUTECT_STANDARD(
-            alignment,
-            alignment_index,
+            ALIGN_STANDARD_MITO.out,
             mito_fasta,
             mito_dict,
             mito_index,
             "standard",
-            sample_id,
             " -L chrM:576-16024 "
         )
 
         CALL_MUTECT_SHIFTED(
-            ALIGN_SHIFTED_MITO.out.bam,
-            ALIGN_SHIFTED_MITO.out.bai,
+            ALIGN_SHIFTED_MITO.out,
             shifted_fasta,
             shifted_dict,
             shifted_index,
             "shifted",
-            sample_id,
             " -L chrM:8025-9144 "  
         )
 
+        ch2 = CALL_MUTECT_STANDARD.out.join(CALL_MUTECT_SHIFTED.out)
         LIFTOVER_AND_COMBINE_VCFS(
-            CALL_MUTECT_SHIFTED.out.vcf,
-            CALL_MUTECT_STANDARD.out.vcf,
-            sample_id,
+            ch2,
             mito_fasta,
             mito_index,
             mito_dict,
             shift_back_chain
         )
 
-        MERGE_STATS(
-            CALL_MUTECT_SHIFTED.out.stats,
-            CALL_MUTECT_STANDARD.out.stats
-        )
+        MERGE_STATS(ch2)
 
         INITIAL_FILTER(
             mito_fasta,
@@ -225,7 +215,7 @@ workflow variant_call {
             LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf,
             LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf_idx,
             MERGE_STATS.out,
-            sample_id,
+            LIFTOVER_AND_COMBINE_VCFS.out.basename,
             blacklist,
             blacklist_index
         )
@@ -236,21 +226,20 @@ workflow variant_call {
             mito_dict,
             INITIAL_FILTER.out.vcf,
             INITIAL_FILTER.out.tbi,
-            sample_id,
+            INITIAL_FILTER.out.basename,
         )
 
         GET_CONTAMINATION(
             SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out.vcf
         )
+
     emit:
-        dup_metrics = ALIGN_STANDARD_MITO.out.metrics
+        standard_algn = ALIGN_STANDARD_MITO.out
         wgs_metrics = COLLECT_WGS_METRICS.out.metrics
         contam_metrics = GET_CONTAMINATION.out.contamination_file
         algn_metrics = COLLECT_ALIGNMENT_METRICS.out
-        bam = ALIGN_STANDARD_MITO.out.bam
-        bai = ALIGN_STANDARD_MITO.out.bai
-        vcf = INITIAL_FILTER.out.vcf
-        tbi = INITIAL_FILTER.out.tbi
+        filtered_vcf = INITIAL_FILTER.out.vcf
+        filtered_tbi = INITIAL_FILTER.out.tbi
 }
 
 
@@ -281,26 +270,24 @@ workflow {
 
     separate_mitochondrion(reads)
 
-    variant_call(separate_mitochondrion.out.ubam, separate_mitochondrion.out.sample_id)
+    variant_call(separate_mitochondrion.out)
   
     CREATE_JSON(
-        variant_call.out.dup_metrics,
+        variant_call.out.standard_algn,
         variant_call.out.wgs_metrics,
         variant_call.out.contam_metrics,
-        variant_call.out.algn_metrics,
-        separate_mitochondrion.out.sample_id
+        variant_call.out.algn_metrics
     )
 
     CREATE_ALL_SAMPLES_CSV(
         CREATE_JSON.out.collect()
     )
-
-    output(
-        variant_call.out.bam.concat(
-            variant_call.out.bai, 
-            variant_call.out.vcf,
-            variant_call.out.tbi,
-            CREATE_ALL_SAMPLES_CSV.out
+    OUTPUT(
+        CREATE_ALL_SAMPLES_CSV.out.concat(
+            variant_call.out.filtered_vcf,
+            variant_call.out.filtered_tbi
         )
     )
+
+    OUTPUT_ALIGNMENTS(variant_call.out.standard_algn)
 }

@@ -7,8 +7,8 @@ process FASTQ_TO_UBAM {
             path(reads)
         
     output:
-        path "${sampleId}.unmaped.bam", emit: ubam
-        val "$sampleId", emit: sample_id
+        tuple val(sampleId), path("${sampleId}.unmaped.bam")
+
     shell:
     """
     fastq_to_ubam.sh ${reads[0]} ${reads[1]} ${sampleId}
@@ -20,15 +20,13 @@ process SELECT_MITO_READS {
     label "human_mito"
 
     input:
-        val sample_id
-        path whole_bam
-        path whole_bai
+        tuple val(sample_id), path(whole_bam), path(whole_bai)
         path fasta
         path dict
         path index
 
     output:
-        path "${sample_id}.mito.unaligned.bam", emit: ubam
+        tuple val(sample_id), path("${sample_id}.mito.unaligned.bam")
 
     script:
     """
@@ -57,8 +55,7 @@ process BWA_ALIGN_FROM_UBAM {
     label "human_mito"
 
     input:
-        val sample_id
-        path ubam
+        tuple val(sample_id), path(ubam)
         path fasta
         path dict
         path index
@@ -69,9 +66,7 @@ process BWA_ALIGN_FROM_UBAM {
         path sa
         path ref_alt
     output:
-        path "${sample_id}.sorted.bam", emit: bam
-        path "${sample_id}.sorted.bai", emit: bai
-
+        tuple val(sample_id), path("${sample_id}.sorted.bam"), path("${sample_id}.sorted.bai")
     
     shell:
     """
@@ -117,8 +112,7 @@ process BWA_ALIGN {
     label "human_mito"
 
     input:
-        path input_bam
-        val sampleId
+        tuple val(sampleId), path(input_bam)
         path mito_fasta
         path mito_dict
         path mito_index
@@ -128,9 +122,12 @@ process BWA_ALIGN {
         path mito_pac
         path mito_sa
     output:
-        path "${sampleId}.bam", emit: bam
-        path "${sampleId}.bai", emit: bai
-        path "${sampleId}.dup.metrics", emit: metrics
+        tuple \
+            val(sampleId), \
+            path("${sampleId}.bam"), \
+            path("${sampleId}.bai"), \
+            path("${sampleId}.dup.metrics")
+
 
     
     shell:
@@ -188,8 +185,7 @@ process COLLECT_ALIGNMENT_METRICS {
     label "human_mito"
 
     input:
-        path bam
-        path bai
+        tuple val(sample_id), path(bam), path(bai), path(dup_stats)
         path reference
         path reference_dict
         path reference_index
@@ -210,10 +206,8 @@ process COLLECT_WGS_METRICS {
     label "human_mito"
 
     input:
-        path bam
-        path bai
+        tuple val(sample_id), path(bam), path(bai), path(dup_stats)
         path reference
-        val sample_id
         val readLen
     output:
         path "${sample_id}.theoretical_sensitivity.txt", emit: sensitivity
@@ -235,20 +229,21 @@ process COLLECT_WGS_METRICS {
 
 process CALL_MUTECT {
     label "human_mito"
+    clusterOptions "-C avx2"
 
     input:
-        path bam
-        path bai
+        tuple val(sample_id), path(bam), path(bai), path(dup_stats)
         path mito_fasta
         path mito_dict
         path mito_index
         val prefix
-        val basename
         val mutect_extra_args
     output:
-        path "${prefix}.${basename}.vcf.gz", emit: vcf
-        path "${prefix}.${basename}.vcf.gz.tbi", emit: tbi
-        path "${prefix}.${basename}.vcf.gz.stats", emit: stats
+        tuple val(sample_id), \
+            path("${prefix}.${sample_id}.vcf.gz"), \
+            path("${prefix}.${sample_id}.vcf.gz.tbi"), \
+            path("${prefix}.${sample_id}.vcf.gz.stats")
+
     script:
     """
     gatk Mutect2 \
@@ -256,7 +251,7 @@ process CALL_MUTECT {
         -I ${bam} \
         --read-filter MateOnSameContigOrNoMappedMateReadFilter \
         --read-filter MateUnmappedAndUnmappedReadFilter \
-        -O "${prefix}.${basename}.vcf.gz" \
+        -O "${prefix}.${sample_id}.vcf.gz" \
         ${mutect_extra_args} \
         --annotation StrandBiasBySample \
         --mitochondria-mode \
@@ -270,8 +265,14 @@ process MERGE_STATS {
     label "human_mito"
 
     input:
-        path shifted_stats
-        path standard_stats
+        tuple \
+            val(sample_id), \
+            path(standard_vcf), \
+            path(standard_tbi), \
+            path(stantard_stats), \
+            path(shifted_vcf), \
+            path(shifted_tbi), \
+            path(shifted_stats)
 
     output:
         path "combined.stats"
@@ -280,40 +281,52 @@ process MERGE_STATS {
     """
     gatk MergeMutectStats \
         --stats ${shifted_stats} \
-        --stats ${standard_stats} \
+        --stats ${stantard_stats} \
         -O combined.stats
     """
 }
-
+// [GEF495-001, 
+// /home/taniguti/github/wf-human-mito/work/40/441c17ead6aa98e50d7b80cda0b003/standard.GEF495-001.vcf.gz, 
+// /home/taniguti/github/wf-human-mito/work/40/441c17ead6aa98e50d7b80cda0b003/standard.GEF495-001.vcf.gz.tbi, 
+// /home/taniguti/github/wf-human-mito/work/40/441c17ead6aa98e50d7b80cda0b003/standard.GEF495-001.vcf.gz.stats, 
+// /home/taniguti/github/wf-human-mito/work/05/f7ef2ad5f1edc682bbd8d5c49aa290/shifted.GEF495-001.vcf.gz, 
+// /home/taniguti/github/wf-human-mito/work/05/f7ef2ad5f1edc682bbd8d5c49aa290/shifted.GEF495-001.vcf.gz.tbi, 
+// /home/taniguti/github/wf-human-mito/work/05/f7ef2ad5f1edc682bbd8d5c49aa290/shifted.GEF495-001.vcf.gz.stats]
 
 process LIFTOVER_AND_COMBINE_VCFS {
     label "human_mito"
     input:
-        path shifted_vcf
-        path vcf
-        val basename
+        tuple \
+            val(sample_id), \
+            path(standard_vcf), \
+            path(standard_tbi), \
+            path(stantard_stats), \
+            path(shifted_vcf), \
+            path(shifted_tbi), \
+            path(shifted_stats)
         path mito_fasta
         path mito_fasta_index
         path mito_dict
         path shift_back_chain
 
     output:
-        path "${basename}.rejected.vcf", emit: rejected
-        path "${basename}.merged.vcf", emit: merged_vcf
-        path "${basename}.merged.vcf.idx", emit: merged_vcf_idx
+        path "${sample_id}.rejected.vcf", emit: rejected
+        path "${sample_id}.merged.vcf", emit: merged_vcf
+        path "${sample_id}.merged.vcf.idx", emit: merged_vcf_idx
+        val sample_id, emit: basename
     script:
     """
     picard LiftoverVcf \
       I=${shifted_vcf} \
-      O=${basename}.shifted_back.vcf \
+      O=${sample_id}.shifted_back.vcf \
       R=${mito_fasta} \
       CHAIN=${shift_back_chain} \
-      REJECT=${basename}.rejected.vcf
+      REJECT=${sample_id}.rejected.vcf
 
     picard MergeVcfs \
-      I=${basename}.shifted_back.vcf \
-      I=${vcf} \
-      O=${basename}.merged.vcf
+      I=${sample_id}.shifted_back.vcf \
+      I=${standard_vcf} \
+      O=${sample_id}.merged.vcf
     """
 }
 
@@ -333,6 +346,7 @@ process FILTER {
     output:
         path "${basename}.vcf.gz", emit: vcf
         path "${basename}.vcf.gz.tbi", emit: tbi
+        val basename, emit: basename
 
     """
     gatk FilterMutectCalls \
@@ -404,11 +418,10 @@ process GET_CONTAMINATION {
 process CREATE_JSON {
     label "human_mito"
     input:
-        path dup_metrics
+        tuple val(sample_id), path(bam), path(bai), path(dup_metrics)
         path wgs_metrics
         path contam_metrics
         path algn_metrics
-        val sample_id
 
     output:
         path "${sample_id}.summary.json"
