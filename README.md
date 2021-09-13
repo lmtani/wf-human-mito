@@ -45,3 +45,9 @@ to see the options for the workflow.
 * [nextflow](https://www.nextflow.io/)
 * [docker](https://www.docker.com/products/docker-desktop)
 * [conda](https://docs.conda.io/en/latest/miniconda.html)
+
+
+### TODOs:
+
+-[ ] COLLECT_WGS_METRICS, input "readLen" should be dinamic. This info is inside COLLECT_ALIGNMENT_METRICS output.
+-[ ] Standardize process and variable name pattern.
