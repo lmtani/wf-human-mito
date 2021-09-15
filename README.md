@@ -49,5 +49,6 @@ to see the options for the workflow.
 
 ### TODOs:
 
--[ ] COLLECT_WGS_METRICS, input "readLen" should be dinamic. This info is inside COLLECT_ALIGNMENT_METRICS output.
--[ ] Standardize process and variable name pattern.
+- [ ] In `COLLECT_WGS_METRICS` process, the input value "readLen" should be dynamic. This info is inside COLLECT_ALIGNMENT_METRICS output.
+
+- [ ] Standardize process and variable name patterns.
