@@ -228,7 +228,7 @@ process COLLECT_WGS_METRICS {
 }
 
 process CALL_MUTECT {
-    label "human_mito"
+    label "human_mito_mutect"
     clusterOptions "-C avx2"
 
     input:
