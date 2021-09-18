@@ -62,14 +62,25 @@ process OUTPUT {
     """
 }
 
-process OUTPUT_ALIGNMENTS {
+process OUTPUT_SAMPLE_DATA {
     label "human_mito"
     publishDir "${params.out_dir}", mode: 'copy', pattern: "*"
     input:
-        tuple val(sample_id), path(bam), path(bai), path(dup_metrics)
+        tuple val(sample_id), \
+            path(vcf), \
+            path(vcf_idx), \
+            path(contam_metrics), \
+            path(bam), \
+            path(bai), \
+            path(dup_metrics), \
+            path(algn_metrics), \
+            path(theoretical_sensitivity), \
+            path(wgs_metrics)    
     output:
         path bam
         path bai
+        path vcf
+        path vcf_idx
     """
     echo "Writing output files"
     """
@@ -208,14 +219,12 @@ workflow variant_call {
 
         MERGE_STATS(ch2)
 
+        ch3 = LIFTOVER_AND_COMBINE_VCFS.out.join(MERGE_STATS.out)
         INITIAL_FILTER(
+            ch3,
             mito_fasta,
             mito_index,
             mito_dict,
-            LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf,
-            LIFTOVER_AND_COMBINE_VCFS.out.merged_vcf_idx,
-            MERGE_STATS.out,
-            LIFTOVER_AND_COMBINE_VCFS.out.basename,
             blacklist,
             blacklist_index
         )
@@ -224,22 +233,30 @@ workflow variant_call {
             mito_fasta,
             mito_index,
             mito_dict,
-            INITIAL_FILTER.out.vcf,
-            INITIAL_FILTER.out.tbi,
-            INITIAL_FILTER.out.basename,
+            INITIAL_FILTER.out
         )
 
         GET_CONTAMINATION(
-            SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out.vcf
+            SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out
         )
 
+        ch4 = INITIAL_FILTER.out.join(GET_CONTAMINATION.out)
+        ch5 = ch4.join(ALIGN_STANDARD_MITO.out)
+        ch6 = ch5.join(COLLECT_ALIGNMENT_METRICS.out)
+        ch7 = ch6.join(COLLECT_WGS_METRICS.out)
+
     emit:
-        standard_algn = ALIGN_STANDARD_MITO.out
-        wgs_metrics = COLLECT_WGS_METRICS.out.metrics
-        contam_metrics = GET_CONTAMINATION.out.contamination_file
-        algn_metrics = COLLECT_ALIGNMENT_METRICS.out
-        filtered_vcf = INITIAL_FILTER.out.vcf
-        filtered_tbi = INITIAL_FILTER.out.tbi
+        ch7
+    // sample_id
+    // vcf.gz
+    // vcf.gz.tbi
+    // contamination_file
+    // alignment
+    // alignment_idx
+    // dup_metrics
+    // algn_metrics
+    // theoretical_sensitivity
+    // wgs_metrics
 }
 
 
@@ -271,23 +288,11 @@ workflow {
     separate_mitochondrion(reads)
 
     variant_call(separate_mitochondrion.out)
-  
-    CREATE_JSON(
-        variant_call.out.standard_algn,
-        variant_call.out.wgs_metrics,
-        variant_call.out.contam_metrics,
-        variant_call.out.algn_metrics
-    )
 
-    CREATE_ALL_SAMPLES_CSV(
-        CREATE_JSON.out.collect()
-    )
-    OUTPUT(
-        CREATE_ALL_SAMPLES_CSV.out.concat(
-            variant_call.out.filtered_vcf,
-            variant_call.out.filtered_tbi
-        )
-    )
+    sample = variant_call.out.join(separate_mitochondrion.out)
+    CREATE_JSON(variant_call.out)
+    CREATE_ALL_SAMPLES_CSV(CREATE_JSON.out.collect())
 
-    OUTPUT_ALIGNMENTS(variant_call.out.standard_algn)
+    OUTPUT(CREATE_ALL_SAMPLES_CSV.out)
+    OUTPUT_SAMPLE_DATA(variant_call.out)
 }

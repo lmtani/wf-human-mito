@@ -128,8 +128,6 @@ process BWA_ALIGN {
             path("${sampleId}.bai"), \
             path("${sampleId}.dup.metrics")
 
-
-    
     shell:
     """
     picard SamToFastq \
@@ -191,14 +189,14 @@ process COLLECT_ALIGNMENT_METRICS {
         path reference_index
     
     output:
-        path "algn_metrics.txt"
+        tuple val(sample_id), path("${sample_id}.algn_metrics.txt")
 
     script:
     """
     picard CollectAlignmentSummaryMetrics \
           R=$reference \
           I=$bam \
-          O=algn_metrics.txt
+          O=${sample_id}.algn_metrics.txt
     """
 }
 
@@ -210,8 +208,10 @@ process COLLECT_WGS_METRICS {
         path reference
         val readLen
     output:
-        path "${sample_id}.theoretical_sensitivity.txt", emit: sensitivity
-        path "${sample_id}.metrics.txt", emit: metrics
+        tuple val(sample_id), \
+            path("${sample_id}.theoretical_sensitivity.txt"), \
+            path("${sample_id}.metrics.txt")
+
     script:
     """
     picard CollectWgsMetrics \
@@ -275,7 +275,7 @@ process MERGE_STATS {
             path(shifted_stats)
 
     output:
-        path "combined.stats"
+        tuple val(sample_id), path("combined.stats")
     
     script:
     """
@@ -285,13 +285,6 @@ process MERGE_STATS {
         -O combined.stats
     """
 }
-// [GEF495-001, 
-// /home/taniguti/github/wf-human-mito/work/40/441c17ead6aa98e50d7b80cda0b003/standard.GEF495-001.vcf.gz, 
-// /home/taniguti/github/wf-human-mito/work/40/441c17ead6aa98e50d7b80cda0b003/standard.GEF495-001.vcf.gz.tbi, 
-// /home/taniguti/github/wf-human-mito/work/40/441c17ead6aa98e50d7b80cda0b003/standard.GEF495-001.vcf.gz.stats, 
-// /home/taniguti/github/wf-human-mito/work/05/f7ef2ad5f1edc682bbd8d5c49aa290/shifted.GEF495-001.vcf.gz, 
-// /home/taniguti/github/wf-human-mito/work/05/f7ef2ad5f1edc682bbd8d5c49aa290/shifted.GEF495-001.vcf.gz.tbi, 
-// /home/taniguti/github/wf-human-mito/work/05/f7ef2ad5f1edc682bbd8d5c49aa290/shifted.GEF495-001.vcf.gz.stats]
 
 process LIFTOVER_AND_COMBINE_VCFS {
     label "human_mito"
@@ -310,10 +303,11 @@ process LIFTOVER_AND_COMBINE_VCFS {
         path shift_back_chain
 
     output:
-        path "${sample_id}.rejected.vcf", emit: rejected
-        path "${sample_id}.merged.vcf", emit: merged_vcf
-        path "${sample_id}.merged.vcf.idx", emit: merged_vcf_idx
-        val sample_id, emit: basename
+        tuple val(sample_id), \
+            path("${sample_id}.rejected.vcf"), \
+            path("${sample_id}.merged.vcf"), \
+            path("${sample_id}.merged.vcf.idx")
+
     script:
     """
     picard LiftoverVcf \
@@ -333,33 +327,34 @@ process LIFTOVER_AND_COMBINE_VCFS {
 process FILTER {
     label "human_mito"
     input:
+        tuple val(sample_id), \
+            path(rejected_vcf), \
+            path(merged_vcf), \
+            path(merged_vcf_index), \
+            path(combined_stats)
         path mito_fasta
         path mito_index
         path mito_dict
-        path raw_vcf
-        path raw_vcf_index
-        path raw_vcf_stats
-        val basename
         path blacklisted_sites
         path blacklisted_sites_index
 
     output:
-        path "${basename}.vcf.gz", emit: vcf
-        path "${basename}.vcf.gz.tbi", emit: tbi
-        val basename, emit: basename
+        tuple val(sample_id), \
+            path("${sample_id}.vcf.gz"), \
+            path("${sample_id}.vcf.gz.tbi")
 
     """
     gatk FilterMutectCalls \
-        -V ${raw_vcf} \
+        -V ${merged_vcf} \
         -R ${mito_fasta} \
         -O filtered.vcf \
-        --stats ${raw_vcf_stats} \
+        --stats ${combined_stats} \
         --max-alt-allele-count 4 \
         --mitochondria-mode \
         --min-allele-fraction 0
 
     gatk VariantFiltration -V filtered.vcf \
-        -O ${basename}.vcf.gz \
+        -O ${sample_id}.vcf.gz \
         --apply-allele-specific-filters \
         --mask ${blacklisted_sites} \
         --mask-name "blacklisted_site"
@@ -372,13 +367,12 @@ process SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES {
         path mito_fasta
         path mito_index
         path mito_dict
-        path filtered_vcf
-        path filtered_vcf_index
-        val sample_id
+        tuple val(sample_id), path(filtered_vcf), path(filtered_vcf_index)
 
     output:
-        path "${sample_id}.pass.vcf.gz", emit: vcf
-        path "${sample_id}.pass.vcf.gz.tbi", emit: tbi
+        tuple val(sample_id), \
+            path("${sample_id}.pass.vcf.gz"), \
+            path("${sample_id}.pass.vcf.gz.tbi")
 
     script:
     """
@@ -400,14 +394,9 @@ process SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES {
 process GET_CONTAMINATION {
     label "mtdnaserver"
     input:
-        path vcf
+        tuple val(sample_id), path(vcf), path(vcf_index)
     output:
-        path "output-noquotes", emit: contamination_file
-        path "contamination.txt", emit: has_contamination
-        path "major_hg.txt", emit: major_hg
-        path "minor_hg.txt", emit: minor_hg
-        path "mean_het_major.txt", emit: major_level
-        path "mean_het_minor.txt", emit: minor_level
+        tuple val(sample_id), path("output-noquotes")
 
     script:
     """
@@ -418,10 +407,16 @@ process GET_CONTAMINATION {
 process CREATE_JSON {
     label "human_mito"
     input:
-        tuple val(sample_id), path(bam), path(bai), path(dup_metrics)
-        path wgs_metrics
-        path contam_metrics
-        path algn_metrics
+        tuple val(sample_id), \
+            path(vcf), \
+            path(vcf_idx), \
+            path(contam_metrics), \
+            path(bam), \
+            path(bai), \
+            path(dup_metrics), \
+            path(algn_metrics), \
+            path(theoretical_sensitivity), \
+            path(wgs_metrics)
 
     output:
         path "${sample_id}.summary.json"
