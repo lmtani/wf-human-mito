@@ -1,5 +1,53 @@
 ---
-layout: home
+layout: default
+title: Quickstart
+nav_order: 1
 ---
 
-WIP
+
+# Human Mitochondrial Workflow
+
+This workflows is heavily inspired by the [gatk-workflows/gatk4-mitochondria-pipeline](https://github.com/gatk-workflows/gatk4-mitochondria-pipeline) and by the [epi2me-labs/wf-template](https://github.com/epi2me-labs/wf-template).
+
+## Quickstart
+
+1. Install Nextflow in your system (see [official documentation](https://www.nextflow.io/docs/latest/getstarted.html#installation))
+2. Download the GRCh38 release of the Human Genome and its index files. You need to save all these files in the same directory. Links from [Google Cloud Life Sciences](https://cloud.google.com/life-sciences/docs/resources/public-datasets/reference-genomes)
+    - [Homo_sapiens_assembly38.fasta](https://storage.cloud.google.com/genomics-public-data/references/hg38/v0/Homo_sapiens_assembly38.fasta)
+    - [Homo_sapiens_assembly38.dict](https://storage.cloud.google.com/genomics-public-data/references/hg38/v0/Homo_sapiens_assembly38.dict)
+    - [Homo_sapiens_assembly38.fasta.fai ](https://storage.cloud.google.com/genomics-public-data/references/hg38/v0/Homo_sapiens_assembly38.fasta.fai)
+    - [Homo_sapiens_assembly38.fasta.64.alt](https://storage.cloud.google.com/genomics-public-data/references/hg38/v0/Homo_sapiens_assembly38.fasta.64.alt)
+    - [Homo_sapiens_assembly38.fasta.64.amb](https://storage.cloud.google.com/genomics-public-data/references/hg38/v0/Homo_sapiens_assembly38.fasta.64.amb)
+    - [Homo_sapiens_assembly38.fasta.64.ann](https://storage.cloud.google.com/genomics-public-data/references/hg38/v0/Homo_sapiens_assembly38.fasta.64.ann)
+    - [Homo_sapiens_assembly38.fasta.64.bwt](https://storage.cloud.google.com/genomics-public-data/references/hg38/v0/Homo_sapiens_assembly38.fasta.64.bwt)
+    - [Homo_sapiens_assembly38.fasta.64.pac](https://storage.cloud.google.com/genomics-public-data/references/hg38/v0/Homo_sapiens_assembly38.fasta.64.pac)
+    - [Homo_sapiens_assembly38.fasta.64.sa](https://storage.cloud.google.com/genomics-public-data/references/hg38/v0/Homo_sapiens_assembly38.fasta.64.sa)
+3. Put your FASTQ files (or symbolic links `ln -s <original> <link>`) in one directory. Use a name pattern in a way that you can identify your samples from the prefix.
+    ```bash
+    20:22 $ ls test_data/*.fq.gz
+    test_data/SAMPLE-A_R1.fq.gz  test_data/SAMPLE-C_R1.fq.gz
+    test_data/SAMPLE-A_R2.fq.gz  test_data/SAMPLE-C_R2.fq.gz
+    test_data/SAMPLE-B_R1.fq.gz  test_data/SAMPLE-D_R1.fq.gz
+    test_data/SAMPLE-B_R2.fq.gz  test_data/SAMPLE-D_R2.fq.gz
+    ```
+4. Run the Human Mitochondrial Workflow
+    ```bash
+    ./nextflow run lmtani/wf-human-mito \
+        --fastq "test_data/*_R{1,2}.fq.gz" \
+        --reference /path/to/Homo_sapiens_assembly38.fasta \
+        --out_dir name-your-output-directory
+    ```
+
+At the end you will have variants (VCF) and alignment (BAM) for each sample and a CSV file with information about each sample (coverage, haplogroup, etc). For more details about the meaning of each column please see [WIP](). Something like this:
+
+```bash
+$ ls name-your-output-directory/
+all_samples.csv        SAMPLE-B.bam            SAMPLE-D.bai
+execution              SAMPLE-B.vcf.gz         SAMPLE-D.bam
+SAMPLE-A.bai           SAMPLE-B.vcf.gz.tbi     SAMPLE-D.vcf.gz
+SAMPLE-A.bam           SAMPLE-C.bai            SAMPLE-D.vcf.gz.tbi
+SAMPLE-A.vcf.gz        SAMPLE-C.bam
+SAMPLE-A.vcf.gz.tbi    SAMPLE-C.vcf.gz
+SAMPLE-B.bai           SAMPLE-C.vcf.gz.tbi
+
+```
