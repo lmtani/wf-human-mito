@@ -13,7 +13,7 @@
 nextflow.enable.dsl = 2
 
 
-include { 
+include {
     BWA_ALIGN as ALIGN_SHIFTED_MITO;
     BWA_ALIGN as ALIGN_STANDARD_MITO;
     BWA_ALIGN_FROM_UBAM;
@@ -75,7 +75,7 @@ process OUTPUT_SAMPLE_DATA {
             path(dup_metrics), \
             path(algn_metrics), \
             path(theoretical_sensitivity), \
-            path(wgs_metrics)    
+            path(wgs_metrics)
     output:
         path bam
         path bai
@@ -127,7 +127,7 @@ workflow separate_mitochondrion {
 
 
 workflow variant_call {
-    take: 
+    take:
         reads
     main:
         // Reference files - stored in github
@@ -152,7 +152,7 @@ workflow variant_call {
         shifted_bwt = file("$baseDir/data/Homo_sapiens_assembly38.chrM.shifted_by_8000_bases.fasta.bwt", type:'file', checkIfExists:true)
         shifted_sa = file("$baseDir/data/Homo_sapiens_assembly38.chrM.shifted_by_8000_bases.fasta.sa", type:'file', checkIfExists:true)
         shifted_pac = file("$baseDir/data/Homo_sapiens_assembly38.chrM.shifted_by_8000_bases.fasta.pac", type:'file', checkIfExists:true)
-    
+
         ALIGN_STANDARD_MITO(
                 reads,
                 mito_fasta,
@@ -205,7 +205,7 @@ workflow variant_call {
             shifted_dict,
             shifted_index,
             "shifted",
-            " -L chrM:8025-9144 "  
+            " -L chrM:8025-9144 "
         )
 
         ch2 = CALL_MUTECT_STANDARD.out.join(CALL_MUTECT_SHIFTED.out)
@@ -284,6 +284,7 @@ workflow {
 
 
     reads = Channel.fromFilePairs("${params.fastq}", glob: true)
+    reads.view()
 
     separate_mitochondrion(reads)
 
