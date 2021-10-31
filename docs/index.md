@@ -1,3 +1,9 @@
+---
+layout: default
+title: Quickstart
+nav_order: 1
+---
+
 # 🚀 Quickstart
 
 This is a workflow (written in Nextflow) to analyse mitochondrial sequencing experiments. Is is heavily inspired by the [gatk-workflows/gatk4-mitochondria-pipeline](https://github.com/gatk-workflows/gatk4-mitochondria-pipeline) and by the [epi2me-labs/wf-template](https://github.com/epi2me-labs/wf-template).
@@ -28,8 +34,6 @@ This is a workflow (written in Nextflow) to analyse mitochondrial sequencing exp
         test_data/SAMPLE-B_R2.fq.gz  test_data/SAMPLE-D_R2.fq.gz
         ```
 
-
-
 4. Run the Human Mitochondrial Workflow
 
     ??? summary "Example"
@@ -39,8 +43,6 @@ This is a workflow (written in Nextflow) to analyse mitochondrial sequencing exp
             --reference /path/to/Homo_sapiens_assembly38.fasta \
             --out_dir name-your-output-directory
         ```
-
-
 
 At the end you will have variants (VCF) and alignment (BAM) for each sample and a CSV file with information about each sample (coverage, haplogroup, etc). For more details about the meaning of each column please see the [Outputs section](#).
 
@@ -56,5 +58,3 @@ At the end you will have variants (VCF) and alignment (BAM) for each sample and 
     SAMPLE-A.vcf.gz.tbi    SAMPLE-C.vcf.gz
     SAMPLE-B.bai           SAMPLE-C.vcf.gz.tbi
     ```
-
-
