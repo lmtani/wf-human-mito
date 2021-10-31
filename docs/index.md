@@ -44,8 +44,7 @@ This is a workflow (written in Nextflow) to analyse mitochondrial sequencing exp
             --out_dir name-your-output-directory
         ```
 
-At the end you will have variants (VCF) and alignment (BAM) for each sample and a CSV file with information about each sample (coverage, haplogroup, etc). For more details about the meaning of each column please see the [Outputs section](#).
-
+In the end, you will have variants (VCF) and alignment (BAM) for each sample and a CSV file with information about each sample (coverage, haplogroup, etc). For more details about the meaning of each column, please see the [📦 Outputs section](outputs)
 
 ??? summary "Example"
     ```sh
