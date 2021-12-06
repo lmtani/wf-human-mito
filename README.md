@@ -1,8 +1,6 @@
 # Human Mitochondrial Workflow
 
-This repository contains a [nextflow](https://www.nextflow.io/) workflow
-for running mitochondrial analysis. This workflows is heavily inspired by the [gatk-workflows/gatk4-mitochondria-pipeline](https://github.com/gatk-workflows/gatk4-mitochondria-pipeline) and by
-the [epi2me-labs/wf-template](https://github.com/epi2me-labs/wf-template).
+This repository contains a [nextflow](https://www.nextflow.io/) workflow for running mitochondrial analysis. This workflow is heavily inspired by the [gatk-workflows/gatk4-mitochondria-pipeline](https://github.com/gatk-workflows/gatk4-mitochondria-pipeline) and by the [epi2me-labs/wf-template](https://github.com/epi2me-labs/wf-template).
 
 
 ## Quickstart
