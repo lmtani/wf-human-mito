@@ -39,8 +39,8 @@ Usage:
     nextflow run lmtani/wf-human-mito [options]
 
 Script Options:
-    --fastq        DIR     Path to FASTQ directory. Quote is required. Ex: "/path/to/fastqs/*_R{1,2}*.fastq.gz" (required)
-    --reference    Dir     Path to reference (GRCh38). BWA index need to be in same directory (required)
+    --fastq        REGEX     Path to FASTQ directory. Quote is required. Ex: "/path/to/fastqs/*_R{1,2}*.fastq.gz" (required)
+    --reference    FILE     Path to reference (GRCh38). BWA index need to be in same directory (required)
     --out_dir      DIR     Path for output (default: $params.out_dir)
 """
 }
