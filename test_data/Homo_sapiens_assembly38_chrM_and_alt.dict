@@ -1,0 +1,3 @@
+@HD	VN:1.6
+@SQ	SN:chr1_KI270707v1_random	LN:32032	M5:78135804eb15220565483b7cdd02f3be	UR:file:/home/taniguti/github/wf-human-mito/test_data/Homo_sapiens_assembly38_chrM_and_alt.fasta
+@SQ	SN:chrM	LN:16569	M5:c68f52674c9fb33aef52dcf399755519	UR:file:/home/taniguti/github/wf-human-mito/test_data/Homo_sapiens_assembly38_chrM_and_alt.fasta

@@ -1,0 +1,14 @@
+
+- name: Run all steps in the pipeline with test data.
+  command: nextflow run main.nf -profile test,standard
+  files:
+    - path: "test-output/all_samples.csv"
+      md5sum: ec7f29d35889db31c150f0d82133afb5
+    - path: "test-output/NA12878.vcf.gz"
+      should_exist: True
+    - path: "test-output/NA12878.vcf.gz.tbi"
+      should_exist: True
+    - path: "test-output/NA12878.bam"
+      should_exist: True
+    - path: "test-output/NA12878.bai"
+      should_exist: True
