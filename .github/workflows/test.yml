@@ -23,6 +23,15 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Run pipeline with test data
+
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install dependencies
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,standard
+          python -m pip install --upgrade pip
+          pip install pytest-workflow
+
+      - name: Run pipeline with test data
+        run: pytest -v .
