@@ -3,14 +3,13 @@
 //
 
 
-include { BWA_ALIGN_FROM_UBAM } from '../../modules.nf'
-include { PRINT_READS } from '../../modules/local/gatk/print_reads.nf'
-include { CALL_MUTECT } from '../../modules/local/gatk/mutect2.nf'
-include { COLLECT_WGS_METRICS } from '../../modules/local/picard/collect_wgs_metrics.nf'
-include { COLLECT_ALIGNMENT_METRICS } from '../../modules/local/picard/collect_alignment_summary_metrics.nf'
-include { MARK_DUPLICATES } from '../../modules/local/picard/mark_duplicates.nf'
-
-include { SORT_SAM } from '../../modules/local/picard/sort_sam.nf'
+include { BWA_ALIGN_FROM_UBAM           } from '../../modules.nf'
+include { PRINT_READS                   } from '../../modules/local/gatk/print_reads.nf'
+include { CALL_MUTECT                   } from '../../modules/local/gatk/mutect2.nf'
+include { COLLECT_WGS_METRICS           } from '../../modules/local/picard/collect_wgs_metrics.nf'
+include { COLLECT_ALIGNMENT_METRICS     } from '../../modules/local/picard/collect_alignment_summary_metrics.nf'
+include { MARK_DUPLICATES               } from '../../modules/local/picard/mark_duplicates.nf'
+include { SORT_SAM                      } from '../../modules/local/picard/sort_sam.nf'
 
 
 workflow CALL_VARIANTS {
