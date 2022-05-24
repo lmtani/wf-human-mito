@@ -8,16 +8,16 @@ include { variant_call } from './subworkflows/local/mitochondrion_variant_call.n
 
 def helpMessage(){
     log.info """
-Human Mitochondrial Analysis Workflow'
+    Human Mitochondrial Analysis Workflow'
 
-Usage:
-    nextflow run lmtani/wf-human-mito [options]
+    Usage:
+        nextflow run lmtani/wf-human-mito [options]
 
-Script Options:
-    --fastq        REGEX     Path to FASTQ directory. Quote is required. Ex: "/path/to/fastqs/*_R{1,2}*.fastq.gz" (required)
-    --reference    FILE     Path to reference (GRCh38). BWA index need to be in same directory (required)
-    --outdir      DIR     Path for output (default: $params.outdir)
-"""
+    Script Options:
+        --fastq        REGEX     Path to FASTQ directory. Quote is required. Ex: "/path/to/fastqs/*_R{1,2}*.fastq.gz" (required)
+        --reference    FILE     Path to reference (GRCh38). BWA index need to be in same directory (required)
+        --outdir      DIR     Path for output (default: $params.outdir)
+    """.stripIndent()
 }
 
 
