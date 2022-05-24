@@ -4,34 +4,20 @@ nextflow.enable.dsl = 2
 
 
 include {
-    BWA_ALIGN_FROM_UBAM as ALIGN_SHIFTED_MITO;
-    BWA_ALIGN_FROM_UBAM as ALIGN_STANDARD_MITO;
-    BWA_ALIGN_FROM_UBAM;
-    CREATE_ALL_SAMPLES_CSV;
-    FILTER as INITIAL_FILTER;
     GET_CONTAMINATION;
-    LIFTOVER_AND_COMBINE_VCFS;
-    MERGE_STATS
     SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES} from './modules.nf'
 
+
+include { MERGE_STATS } from './modules/local/gatk/merge_mutect_stats.nf'
+include { BWA_ALIGN_FROM_UBAM } from './modules.nf'
 include { FASTQ_TO_UBAM } from './modules/local/picard/fastq_to_sam.nf'
-
-include { CREATE_JSON } from './modules/local/custom/create_sample_json.nf'
-
-include { COLLECT_ALIGNMENT_METRICS } from './modules/local/picard/collect_alignment_summary_metrics.nf'
-
+include { LIFTOVER_VCF } from './modules/local/picard/liftover_vcf.nf'
+include { MERGE_VCFS } from './modules/local/picard/merge_vcfs.nf'
 include { PRINT_READS } from './modules/local/gatk/print_reads.nf'
-include { 
-    CALL_MUTECT as CALL_MUTECT_SHIFTED;
-    CALL_MUTECT as CALL_MUTECT_STANDARD } from './modules/local/gatk/mutect2.nf'
-
+include { FILTER_MUTECT_CALLS } from './modules/local/gatk/mitochondrial_variants_filter.nf'
 include { SELECT_MITO_READS } from './modules/local/picard/revert_sam.nf'
-include { COLLECT_WGS_METRICS } from './modules/local/picard/collect_wgs_metrics.nf'
-
-include { SORT_SAM; SORT_SAM as SORT_SHIFTED; SORT_SAM as SORT_DEFAULT } from './modules/local/picard/sort_sam.nf'
-
-include { MARK_DUPLICATES as MARK_DUP_SHIFTED; MARK_DUPLICATES as MARK_DUP_DEFAULT } from './modules/local/picard/mark_duplicates.nf'
-
+include { SORT_SAM } from './modules/local/picard/sort_sam.nf'
+include { CALL_VARIANTS as CALL_DEFAULT; CALL_VARIANTS as CALL_SHIFTED } from './subworkflows/local/mutect2_variant_call.nf'
 
 def helpMessage(){
     log.info """
@@ -100,85 +86,22 @@ workflow variant_call {
     take:
         reads
     main:
-        ALIGN_STANDARD_MITO(
-                reads,
-                params.mito_fasta,
-                params.mito_dict,
-                params.mito_index,
-                params.mito_amb,
-                params.mito_ann,
-                params.mito_bwt,
-                params.mito_pac,
-                params.mito_sa,
-                params.mito_fake_alt
-        )
+        CALL_DEFAULT(reads, " -L chrM:576-16024 ", "standard")
+        CALL_SHIFTED(reads, " -L chrM:8025-9144 ", "shifted")
 
-        MARK_DUP_DEFAULT(ALIGN_STANDARD_MITO.out)
-
-        SORT_DEFAULT(MARK_DUP_DEFAULT.out.bam)
-
-        ALIGN_SHIFTED_MITO(
-            reads,
-            params.shifted_fasta,
-            params.shifted_dict,
-            params.shifted_index,
-            params.shifted_amb,
-            params.shifted_ann,
-            params.shifted_bwt,
-            params.shifted_pac,
-            params.shifted_sa,
-            params.mito_fake_alt
-        )
-
-        MARK_DUP_SHIFTED(ALIGN_SHIFTED_MITO.out)
-
-        SORT_SHIFTED(MARK_DUP_SHIFTED.out.bam)
-
-        COLLECT_ALIGNMENT_METRICS(
-            SORT_DEFAULT.out,
-            params.mito_fasta,
-            params.mito_dict,
-            params.mito_index
-        )
-
-        COLLECT_WGS_METRICS(
-            SORT_DEFAULT.out,
-            params.mito_fasta,
-            300
-        )
-
-        CALL_MUTECT_STANDARD(
-            SORT_DEFAULT.out,
-            params.mito_fasta,
-            params.mito_dict,
-            params.mito_index,
-            "standard",
-            " -L chrM:576-16024 "
-        )
-
-        CALL_MUTECT_SHIFTED(
-            SORT_SHIFTED.out,
-            params.shifted_fasta,
-            params.shifted_dict,
-            params.shifted_index,
-            "shifted",
-            " -L chrM:8025-9144 "
-        )
-
-        ch2 = CALL_MUTECT_STANDARD.out.join(CALL_MUTECT_SHIFTED.out)
-        LIFTOVER_AND_COMBINE_VCFS(
-            ch2,
+        LIFTOVER_VCF(
+            CALL_SHIFTED.out.variants,
             params.mito_fasta,
             params.mito_index,
             params.mito_dict,
-            params.shift_back_chain
+            params.shift_back_chain,
         )
 
-        MERGE_STATS(ch2)
+        MERGE_VCFS(CALL_DEFAULT.out.variants.join(LIFTOVER_VCF.out))
+        MERGE_STATS(CALL_DEFAULT.out.mutect_stats.join(CALL_SHIFTED.out.mutect_stats))
 
-        ch3 = LIFTOVER_AND_COMBINE_VCFS.out.join(MERGE_STATS.out)
-        INITIAL_FILTER(
-            ch3,
+        FILTER_MUTECT_CALLS(
+            MERGE_VCFS.out.join(MERGE_STATS.out),
             params.mito_fasta,
             params.mito_index,
             params.mito_dict,
@@ -190,17 +113,17 @@ workflow variant_call {
             params.mito_fasta,
             params.mito_index,
             params.mito_dict,
-            INITIAL_FILTER.out
+            FILTER_MUTECT_CALLS.out
         )
 
         GET_CONTAMINATION(
             SPLIT_MULTIALLELICS_AND_REMOVE_NON_PASS_SITES.out
         )
 
-        ch4 = INITIAL_FILTER.out.join(GET_CONTAMINATION.out)
-        ch5 = ch4.join(ALIGN_STANDARD_MITO.out)
-        ch6 = ch5.join(COLLECT_ALIGNMENT_METRICS.out)
-        ch7 = ch6.join(COLLECT_WGS_METRICS.out)
+        ch4 = FILTER_MUTECT_CALLS.out.join(GET_CONTAMINATION.out)
+        ch5 = ch4.join(CALL_DEFAULT.out.alignment)
+        ch6 = ch5.join(CALL_DEFAULT.out.algn_metrics)
+        ch7 = ch6.join(CALL_DEFAULT.out.wgs_metrics)
 
     emit:
         ch7

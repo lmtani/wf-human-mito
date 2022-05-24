@@ -119,30 +119,30 @@ process BWA_ALIGN_FROM_UBAM {
 //     """
 // }
 
-process MERGE_STATS {
-    label "human_mito"
+// process MERGE_STATS {
+//     label "human_mito"
 
-    input:
-        tuple \
-            val(sample_id), \
-            path(standard_vcf), \
-            path(standard_tbi), \
-            path(stantard_stats), \
-            path(shifted_vcf), \
-            path(shifted_tbi), \
-            path(shifted_stats)
+//     input:
+//         tuple \
+//             val(sample_id), \
+//             path(standard_vcf), \
+//             path(standard_tbi), \
+//             path(stantard_stats), \
+//             path(shifted_vcf), \
+//             path(shifted_tbi), \
+//             path(shifted_stats)
 
-    output:
-        tuple val(sample_id), path("combined.stats")
+//     output:
+//         tuple val(sample_id), path("combined.stats")
     
-    script:
-    """
-    gatk MergeMutectStats \
-        --stats ${shifted_stats} \
-        --stats ${stantard_stats} \
-        -O combined.stats
-    """
-}
+//     script:
+//     """
+//     gatk MergeMutectStats \
+//         --stats ${shifted_stats} \
+//         --stats ${stantard_stats} \
+//         -O combined.stats
+//     """
+// }
 
 process LIFTOVER_AND_COMBINE_VCFS {
     label "human_mito"

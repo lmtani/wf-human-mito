@@ -11,10 +11,8 @@ process CALL_MUTECT {
         val prefix
         val mutect_extra_args
     output:
-        tuple val(sample_id), \
-            path("${prefix}.${sample_id}.vcf.gz"), \
-            path("${prefix}.${sample_id}.vcf.gz.tbi"), \
-            path("${prefix}.${sample_id}.vcf.gz.stats")
+        tuple val(sample_id), path("${prefix}.${sample_id}.vcf.gz"), path("${prefix}.${sample_id}.vcf.gz.tbi"), emit: vcf
+        tuple val(sample_id), path("${prefix}.${sample_id}.vcf.gz.stats"), emit: stats
 
     script:
     """
