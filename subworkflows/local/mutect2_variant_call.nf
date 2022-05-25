@@ -18,26 +18,26 @@ workflow CALL_VARIANTS {
     main:
         BWA_ALIGN_FROM_UBAM(
                 reads,
-                params.mito_fasta,
-                params.mito_dict,
-                params.mito_index,
-                params.mito_amb,
-                params.mito_ann,
-                params.mito_bwt,
-                params.mito_pac,
-                params.mito_sa,
-                params.mito_fake_alt
+                params.genome.mito_fasta,
+                params.genome.mito_dict,
+                params.genome.mito_index,
+                params.genome.mito_amb,
+                params.genome.mito_ann,
+                params.genome.mito_bwt,
+                params.genome.mito_pac,
+                params.genome.mito_sa,
+                params.genome.mito_fake_alt
         )
 
         MARK_DUPLICATES(BWA_ALIGN_FROM_UBAM.out)
 
         SORT_SAM(MARK_DUPLICATES.out.bam)
 
-        COLLECT_ALIGNMENT_METRICS(SORT_SAM.out, params.mito_fasta, params.mito_dict, params.mito_index)
+        COLLECT_ALIGNMENT_METRICS(SORT_SAM.out, params.genome.mito_fasta, params.genome.mito_dict, params.genome.mito_index)
 
-        COLLECT_WGS_METRICS(SORT_SAM.out, params.mito_fasta, 300)  //TODO: parse READ_LENGTH value
+        COLLECT_WGS_METRICS(SORT_SAM.out, params.genome.mito_fasta, 300)  //TODO: parse READ_LENGTH value
 
-        CALL_MUTECT( SORT_SAM.out, params.mito_fasta, params.mito_dict, params.mito_index, prefix, interval)
+        CALL_MUTECT(SORT_SAM.out, params.genome.mito_fasta, params.genome.mito_dict, params.genome.mito_index, prefix, interval)
 
     emit:
         variants             = CALL_MUTECT.out.vcf            // channel: [ val(sample_id), vcf, tbi ]

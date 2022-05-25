@@ -1,6 +1,7 @@
 
 process CREATE_JSON {
-    label "human_mito"
+    container "taniguti/wf-human-mito:${params.wfversion}"
+
     input:
         tuple \
             val(sample_id),

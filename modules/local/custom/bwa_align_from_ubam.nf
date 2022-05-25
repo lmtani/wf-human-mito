@@ -1,5 +1,5 @@
 process BWA_ALIGN_FROM_UBAM {
-    label "human_mito"
+    container "taniguti/wf-human-mito:${params.wfversion}"
 
     input:
         tuple val(sample_id), path(ubam)

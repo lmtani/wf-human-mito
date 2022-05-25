@@ -1,5 +1,7 @@
 process AGGREGATE_SAMPLES_IN_CSV {
-    label "human_mito"
+
+    container "taniguti/wf-human-mito:${params.wfversion}"
+
     input:
         path json
 

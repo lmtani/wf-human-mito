@@ -23,10 +23,10 @@ workflow variant_call {
 
         LIFTOVER_VCF(
             CALL_SHIFTED.out.variants,
-            params.mito_fasta,
-            params.mito_index,
-            params.mito_dict,
-            params.shift_back_chain,
+            params.genome.mito_fasta,
+            params.genome.mito_index,
+            params.genome.mito_dict,
+            params.genome.shift_back_chain,
         )
 
         MERGE_VCFS(CALL_DEFAULT.out.variants.join(LIFTOVER_VCF.out))
@@ -34,29 +34,29 @@ workflow variant_call {
 
         FILTER_MUTECT_CALLS(
             MERGE_VCFS.out.join(MERGE_STATS.out),
-            params.mito_fasta,
-            params.mito_index,
-            params.mito_dict,
-            params.blacklist,
-            params.blacklist_index
+            params.genome.mito_fasta,
+            params.genome.mito_index,
+            params.genome.mito_dict,
+            params.genome.blacklist,
+            params.genome.blacklist_index
         )
 
         LEFT_ALIGN_AND_TRIM_VARIANTS(
-            params.mito_fasta,
-            params.mito_index,
-            params.mito_dict,
+            params.genome.mito_fasta,
+            params.genome.mito_index,
+            params.genome.mito_dict,
             FILTER_MUTECT_CALLS.out
         )
 
         SELECT_VARIANTS(LEFT_ALIGN_AND_TRIM_VARIANTS.out)
 
-        GET_CONTAMINATION( SELECT_VARIANTS.out )
+        GET_CONTAMINATION(SELECT_VARIANTS.out)
 
     emit:
-        mutect_vcf = FILTER_MUTECT_CALLS.out                 // channel: [ val(sample_id), vcf, tbi ]
-        contamination = GET_CONTAMINATION.out                // channel: [ val(sample_id), contam ]
-        alignment = CALL_DEFAULT.out.alignment               // channel: [ val(sample_id), bam, bai ]
-        alignment_metrics = CALL_DEFAULT.out.algn_metrics    // channel: [ val(sample_id), algn_metrics, theoretical_sensitivity ]
-        alignment_wgs = CALL_DEFAULT.out.wgs_metrics         // channel: [ val(sample_id), wgs_metrics ]
-        dup_metrics = CALL_DEFAULT.out.dup_metrics           // channel: [ val(sample_id), dup_metrics ]
+        mutect_vcf        = FILTER_MUTECT_CALLS.out        // channel: [ val(sample_id), vcf, tbi ]
+        contamination     = GET_CONTAMINATION.out          // channel: [ val(sample_id), contam ]
+        alignment         = CALL_DEFAULT.out.alignment     // channel: [ val(sample_id), bam, bai ]
+        alignment_metrics = CALL_DEFAULT.out.algn_metrics  // channel: [ val(sample_id), algn_metrics, theoretical_sensitivity ]
+        alignment_wgs     = CALL_DEFAULT.out.wgs_metrics   // channel: [ val(sample_id), wgs_metrics ]
+        dup_metrics       = CALL_DEFAULT.out.dup_metrics   // channel: [ val(sample_id), dup_metrics ]
 }

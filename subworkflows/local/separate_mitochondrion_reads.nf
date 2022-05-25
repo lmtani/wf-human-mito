@@ -14,14 +14,14 @@ workflow separate_mitochondrion {
     main:
         // Human Reference
         fasta = file("${params.reference}", type:'file', checkIfExists:true)
-        dict = file("${fasta.getParent()}/${fasta.baseName}.dict", type:'file', checkIfExists:true)
+        dict  = file("${fasta.getParent()}/${fasta.baseName}.dict", type:'file', checkIfExists:true)
         index = file("${params.reference}.fai", type:'file', checkIfExists:true)
-        amb = file("${params.reference}.64.amb", type:'file', checkIfExists:true)
-        ann = file("${params.reference}.64.ann", type:'file', checkIfExists:true)
-        bwt = file("${params.reference}.64.bwt", type:'file', checkIfExists:true)
-        sa = file("${params.reference}.64.sa", type:'file', checkIfExists:true)
-        pac = file("${params.reference}.64.pac", type:'file', checkIfExists:true)
-        alt = file("${params.reference}.64.alt", type:'file', checkIfExists:true)
+        amb   = file("${params.reference}.64.amb", type:'file', checkIfExists:true)
+        ann   = file("${params.reference}.64.ann", type:'file', checkIfExists:true)
+        bwt   = file("${params.reference}.64.bwt", type:'file', checkIfExists:true)
+        sa    = file("${params.reference}.64.sa", type:'file', checkIfExists:true)
+        pac   = file("${params.reference}.64.pac", type:'file', checkIfExists:true)
+        alt   = file("${params.reference}.64.alt", type:'file', checkIfExists:true)
 
         FASTQ_TO_UBAM(reads)
 
@@ -29,9 +29,9 @@ workflow separate_mitochondrion {
 
         SORT_SAM(BWA_ALIGN_FROM_UBAM.out)
 
-        PRINT_READS(SORT_SAM.out, human_fasta, human_index, human_dict)
+        PRINT_READS(SORT_SAM.out, fasta, index, dict)
 
-        SELECT_MITO_READS(PRINT_READS.out, human_fasta, human_dict, human_index)
+        SELECT_MITO_READS(PRINT_READS.out, fasta, dict, index)
 
     emit:
         SELECT_MITO_READS.out  // channel: [ val(sample_id), ubam ]

@@ -4,8 +4,8 @@ nextflow.enable.dsl = 2
 
 
 include { separate_mitochondrion } from './subworkflows/local/separate_mitochondrion_reads.nf'
-include { variant_call } from './subworkflows/local/mitochondrion_variant_call.nf'
-include { make_report } from './subworkflows/local/make_report.nf'
+include { variant_call           } from './subworkflows/local/mitochondrion_variant_call.nf'
+include { make_report            } from './subworkflows/local/make_report.nf'
 
 
 def helpMessage(){
