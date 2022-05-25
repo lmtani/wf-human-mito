@@ -1,6 +1,6 @@
 
 - name: Run all steps in the pipeline with test data.
-  command: nextflow run main.nf -profile test,standard
+  command: nextflow run main.nf -profile docker,ci_test
   files:
     - path: "test-output/all_samples.csv"
       md5sum: ec7f29d35889db31c150f0d82133afb5
