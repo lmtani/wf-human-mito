@@ -25,7 +25,7 @@ def main(dup_metrics, wgs_metrics, algn_metrics, contamination_metrics):
     algn = parse_two_lines_metrics(algn_metrics, 6, 9)
 
     with open("summary.json", "w") as f:
-        json.dump(dict(**dup, **wgs, **contam, **algn), f, indent=4) 
+        json.dump(dict(**dup, **wgs, **contam, **algn), f, indent=4)
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

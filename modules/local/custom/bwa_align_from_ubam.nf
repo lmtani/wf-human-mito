@@ -14,7 +14,7 @@ process BWA_ALIGN_FROM_UBAM {
         path ref_alt
     output:
         tuple val(sample_id), path("${sample_id}.temp.bam")
-    
+
     shell:
     """
     picard SamToFastq \

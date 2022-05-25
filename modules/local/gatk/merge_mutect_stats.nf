@@ -6,7 +6,7 @@ process MERGE_STATS {
 
     output:
         tuple val(sample_id), path("combined.stats")
-    
+
     script:
     """
     gatk MergeMutectStats \

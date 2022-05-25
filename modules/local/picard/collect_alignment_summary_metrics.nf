@@ -7,7 +7,7 @@ process COLLECT_ALIGNMENT_METRICS {
         path reference
         path reference_dict
         path reference_index
-    
+
     output:
         tuple val(sample_id), path("${sample_id}.algn_metrics.txt")
 

@@ -5,7 +5,7 @@ process FASTQ_TO_UBAM {
         tuple \
             val(sampleId), \
             path(reads)
-        
+
     output:
         tuple val(sampleId), path("${sampleId}.unmaped.bam")
 
