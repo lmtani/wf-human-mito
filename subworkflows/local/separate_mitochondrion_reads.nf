@@ -1,4 +1,4 @@
-include { BWA_ALIGN_FROM_UBAM        } from '../../modules.nf'
+include { BWA_ALIGN_FROM_UBAM        } from '../../modules/local/custom/bwa_align_from_ubam.nf'
 include { FASTQ_TO_UBAM              } from '../../modules/local/picard/fastq_to_sam.nf'
 include { PRINT_READS                } from '../../modules/local/gatk/print_reads.nf'
 include { SELECT_MITO_READS          } from '../../modules/local/picard/revert_sam.nf'

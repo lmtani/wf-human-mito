@@ -3,7 +3,7 @@
 //
 
 
-include { BWA_ALIGN_FROM_UBAM           } from '../../modules.nf'
+include { BWA_ALIGN_FROM_UBAM           } from '../../modules/local/custom/bwa_align_from_ubam.nf'
 include { PRINT_READS                   } from '../../modules/local/gatk/print_reads.nf'
 include { CALL_MUTECT                   } from '../../modules/local/gatk/mutect2.nf'
 include { COLLECT_WGS_METRICS           } from '../../modules/local/picard/collect_wgs_metrics.nf'
