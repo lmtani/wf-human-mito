@@ -47,6 +47,21 @@ workflow {
 
     reads = Channel.fromFilePairs("${params.fastq}", glob: true)
 
+        // TODO: use val(meta)
+        // .map {
+        //     meta, fastq ->
+        //     def fmeta = [:]
+        //     // Set meta.id
+        //     fmeta.id = meta
+        //     // Set meta.single_end
+        //     if (fastq.size() == 1) {
+        //         fmeta.single_end = true
+        //     } else {
+        //         fmeta.single_end = false
+        //     }
+        //     [ fmeta, fastq ]
+        // }
+
     separate_mitochondrion(reads)
 
     variant_call(separate_mitochondrion.out)

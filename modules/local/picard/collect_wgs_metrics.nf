@@ -10,8 +10,8 @@ process COLLECT_WGS_METRICS {
         val readLen
     output:
         tuple val(sample_id), \
-            path("${sample_id}.theoretical_sensitivity.txt"), \
-            path("${sample_id}.metrics.txt")
+            path("${sample_id}.metrics.txt"), \
+            path("${sample_id}.theoretical_sensitivity.txt")
 
     script:
     """
