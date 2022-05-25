@@ -2,9 +2,7 @@
 // Call mitochondrial variants
 //
 
-
 include { BWA_ALIGN_FROM_UBAM           } from '../../modules/local/custom/bwa_align_from_ubam.nf'
-include { PRINT_READS                   } from '../../modules/local/gatk/print_reads.nf'
 include { CALL_MUTECT                   } from '../../modules/local/gatk/mutect2.nf'
 include { COLLECT_WGS_METRICS           } from '../../modules/local/picard/collect_wgs_metrics.nf'
 include { COLLECT_ALIGNMENT_METRICS     } from '../../modules/local/picard/collect_alignment_summary_metrics.nf'
@@ -64,4 +62,5 @@ workflow CALL_VARIANTS {
         wgs_metrics          = COLLECT_WGS_METRICS.out        // channel: [ val(sample_id), theoretical_sensibility, metrics ]
         algn_metrics         = COLLECT_ALIGNMENT_METRICS.out  // channel: [ val(sample_id), metrics ]
         alignment            = SORT_SAM.out                   // channel: [ val(sample_id), bam, bai ]
+        dup_metrics          = MARK_DUPLICATES.out.metrics
 }

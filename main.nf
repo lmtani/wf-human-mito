@@ -5,6 +5,8 @@ nextflow.enable.dsl = 2
 
 include { separate_mitochondrion } from './subworkflows/local/separate_mitochondrion_reads.nf'
 include { variant_call } from './subworkflows/local/mitochondrion_variant_call.nf'
+include { make_report } from './subworkflows/local/make_report.nf'
+
 
 def helpMessage(){
     log.info """
@@ -49,6 +51,11 @@ workflow {
 
     variant_call(separate_mitochondrion.out)
 
-    // CREATE_JSON(variant_call.out)
-    // CREATE_ALL_SAMPLES_CSV(CREATE_JSON.out.collect())
+    make_report(
+        variant_call.out.contamination,
+        variant_call.out.alignment_metrics,
+        variant_call.out.alignment_wgs,
+        variant_call.out.dup_metrics
+    )
+
 }
