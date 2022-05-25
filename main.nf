@@ -17,8 +17,8 @@ def helpMessage(){
 
     Script Options:
         --fastq        REGEX     Path to FASTQ directory. Quote is required. Ex: "/path/to/fastqs/*_R{1,2}*.fastq.gz" (required)
-        --reference    FILE     Path to reference (GRCh38). BWA index need to be in same directory (required)
-        --outdir      DIR     Path for output (default: $params.outdir)
+        --reference    FILE      Path to reference (GRCh38). BWA index need to be in same directory (required)
+        --outdir       DIR       Path for output (default: $params.outdir)
     """.stripIndent()
 }
 
