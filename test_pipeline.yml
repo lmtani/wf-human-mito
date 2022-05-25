@@ -4,11 +4,11 @@
   files:
     - path: "test-output/all_samples.csv"
       md5sum: ec7f29d35889db31c150f0d82133afb5
-    - path: "test-output/NA12878.vcf.gz"
+    - path: "test-output/variants/NA12878.vcf.gz"
       should_exist: True
-    - path: "test-output/NA12878.vcf.gz.tbi"
+    - path: "test-output/variants/NA12878.vcf.gz.tbi"
       should_exist: True
-    - path: "test-output/NA12878.bam"
+    - path: "test-output/alignments/NA12878.sorted.bam"
       should_exist: True
-    - path: "test-output/NA12878.bai"
+    - path: "test-output/alignments/NA12878.sorted.bai"
       should_exist: True

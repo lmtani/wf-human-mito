@@ -1,3 +1,7 @@
+//
+// Call mitochondrial variants, using shifted approach
+// described in https://gnomad.broadinstitute.org/news/2020-11-gnomad-v3-1-mitochondrial-dna-variants/#mtdna-calling-pipeline-for-single-samples
+//
 include { MERGE_STATS                             } from '../../modules/local/gatk/merge_mutect_stats.nf'
 include { GET_CONTAMINATION                       } from '../../modules/local/haplocheckCLI/haplocheck_cli.nf'
 include { LIFTOVER_VCF                            } from '../../modules/local/picard/liftover_vcf.nf'
@@ -10,10 +14,9 @@ include {
         CALL_VARIANTS as CALL_SHIFTED             } from '../../subworkflows/local/mutect2_variant_call.nf'
 
 
-
 workflow variant_call {
     take:
-        reads
+        reads  // channel: [ val(sample_id), ubam ]
     main:
         CALL_DEFAULT(reads, " -L chrM:576-16024 ", "standard")
         CALL_SHIFTED(reads, " -L chrM:8025-9144 ", "shifted")
@@ -50,10 +53,10 @@ workflow variant_call {
         GET_CONTAMINATION( SELECT_VARIANTS.out )
 
     emit:
-        mutect_vcf = FILTER_MUTECT_CALLS.out                 // channel: [ val(sample_id), vcf, tbi
-        contamination = GET_CONTAMINATION.out                // channel: [ val(sample_id), contam
-        alignment = CALL_DEFAULT.out.alignment               // channel: [ val(sample_id), bam, bai
-        alignment_metrics = CALL_DEFAULT.out.algn_metrics    // channel: [ val(sample_id), algn_metrics, theoretical_sensitivity
-        alignment_wgs = CALL_DEFAULT.out.wgs_metrics         // channel: [ val(sample_id), wgs_metrics
-        dup_metrics = CALL_DEFAULT.out.dup_metrics           // channel: [ val(sample_id), dup_metrics
+        mutect_vcf = FILTER_MUTECT_CALLS.out                 // channel: [ val(sample_id), vcf, tbi ]
+        contamination = GET_CONTAMINATION.out                // channel: [ val(sample_id), contam ]
+        alignment = CALL_DEFAULT.out.alignment               // channel: [ val(sample_id), bam, bai ]
+        alignment_metrics = CALL_DEFAULT.out.algn_metrics    // channel: [ val(sample_id), algn_metrics, theoretical_sensitivity ]
+        alignment_wgs = CALL_DEFAULT.out.wgs_metrics         // channel: [ val(sample_id), wgs_metrics ]
+        dup_metrics = CALL_DEFAULT.out.dup_metrics           // channel: [ val(sample_id), dup_metrics ]
 }

@@ -57,5 +57,4 @@ workflow {
         variant_call.out.alignment_wgs,
         variant_call.out.dup_metrics
     )
-
 }

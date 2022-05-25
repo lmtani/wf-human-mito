@@ -1,7 +1,6 @@
 //
-// Call mitochondrial variants
+// Call mitochondrial variants for the given interval
 //
-
 include { BWA_ALIGN_FROM_UBAM           } from '../../modules/local/custom/bwa_align_from_ubam.nf'
 include { CALL_MUTECT                   } from '../../modules/local/gatk/mutect2.nf'
 include { COLLECT_WGS_METRICS           } from '../../modules/local/picard/collect_wgs_metrics.nf'
@@ -12,9 +11,9 @@ include { SORT_SAM                      } from '../../modules/local/picard/sort_
 
 workflow CALL_VARIANTS {
     take:
-        reads     // channel: [ val(sample_id), reads_input  ]
-        interval  // channel: [ val(interval) ]
-        prefix    // channel: [ val(name) ]
+        reads     // channel: [ val(sample_id), ubam ]
+        interval  // channel: val(interval)
+        prefix    // channel: val(name)
 
     main:
         BWA_ALIGN_FROM_UBAM(
@@ -34,27 +33,11 @@ workflow CALL_VARIANTS {
 
         SORT_SAM(MARK_DUPLICATES.out.bam)
 
-        COLLECT_ALIGNMENT_METRICS(
-            SORT_SAM.out,
-            params.mito_fasta,
-            params.mito_dict,
-            params.mito_index
-        )
+        COLLECT_ALIGNMENT_METRICS(SORT_SAM.out, params.mito_fasta, params.mito_dict, params.mito_index)
 
-        COLLECT_WGS_METRICS(
-            SORT_SAM.out,
-            params.mito_fasta,
-            300
-        )
+        COLLECT_WGS_METRICS(SORT_SAM.out, params.mito_fasta, 300)  //TODO: parse READ_LENGTH value
 
-        CALL_MUTECT(
-            SORT_SAM.out,
-            params.mito_fasta,
-            params.mito_dict,
-            params.mito_index,
-            prefix,
-            interval
-        )
+        CALL_MUTECT( SORT_SAM.out, params.mito_fasta, params.mito_dict, params.mito_index, prefix, interval)
 
     emit:
         variants             = CALL_MUTECT.out.vcf            // channel: [ val(sample_id), vcf, tbi ]
@@ -62,5 +45,5 @@ workflow CALL_VARIANTS {
         wgs_metrics          = COLLECT_WGS_METRICS.out        // channel: [ val(sample_id), theoretical_sensibility, metrics ]
         algn_metrics         = COLLECT_ALIGNMENT_METRICS.out  // channel: [ val(sample_id), metrics ]
         alignment            = SORT_SAM.out                   // channel: [ val(sample_id), bam, bai ]
-        dup_metrics          = MARK_DUPLICATES.out.metrics
+        dup_metrics          = MARK_DUPLICATES.out.metrics    // channel: [ val(sample_id), metrics ]
 }
