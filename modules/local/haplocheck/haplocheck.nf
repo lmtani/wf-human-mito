@@ -20,6 +20,6 @@ process HAPLOCHECK {
 
     script:
     """
-    haplocheck --raw --out $sample_id $vcf
+    LC_ALL=en_US.UTF-8 haplocheck --raw --out $sample_id $vcf
     """
 }

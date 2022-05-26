@@ -1,5 +1,23 @@
 - name: Run all steps in the pipeline with test data.
+  tags:
+    - docker
   command: nextflow run main.nf -profile docker,ci_test
+  files:
+    - path: "test-output/all_samples.csv"
+      md5sum: 12dc6d4b298e65dc350e36fce7f1aa82
+    - path: "test-output/variants/NA12878.vcf.gz"
+      should_exist: True
+    - path: "test-output/variants/NA12878.vcf.gz.tbi"
+      should_exist: True
+    - path: "test-output/alignments/NA12878.sorted.bam"
+      should_exist: True
+    - path: "test-output/alignments/NA12878.sorted.bai"
+      should_exist: True
+
+- name: Run all steps in the pipeline with test data.
+  tags:
+    - conda
+  command: nextflow run main.nf -profile conda,ci_test
   files:
     - path: "test-output/all_samples.csv"
       md5sum: 12dc6d4b298e65dc350e36fce7f1aa82
