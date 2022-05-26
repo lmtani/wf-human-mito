@@ -12,8 +12,8 @@ def read_one_line(path):
 def parse_two_lines_metrics(path, keys: int, values: int):
     h = open(path)
     lines = h.readlines()
-    header = lines[keys].strip().split("\t")
-    values = lines[values].strip().split("\t")
+    header = lines[keys].strip().replace('"', '').split("\t")
+    values = lines[values].strip().replace('"', '').split("\t")
     h.close()
     return {k:v for k,v in zip(header, values)}
 

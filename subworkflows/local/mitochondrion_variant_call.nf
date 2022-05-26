@@ -3,7 +3,7 @@
 // described in https://gnomad.broadinstitute.org/news/2020-11-gnomad-v3-1-mitochondrial-dna-variants/#mtdna-calling-pipeline-for-single-samples
 //
 include { MERGE_STATS                             } from '../../modules/local/gatk/merge_mutect_stats.nf'
-include { GET_CONTAMINATION                       } from '../../modules/local/haplocheckCLI/haplocheck_cli.nf'
+include { HAPLOCHECK                              } from '../../modules/local/haplocheck/haplocheck.nf'
 include { LIFTOVER_VCF                            } from '../../modules/local/picard/liftover_vcf.nf'
 include { MERGE_VCFS                              } from '../../modules/local/picard/merge_vcfs.nf'
 include { FILTER_MUTECT_CALLS                     } from '../../modules/local/gatk/mitochondrial_variants_filter.nf'
@@ -76,11 +76,11 @@ workflow variant_call {
 
         SELECT_VARIANTS(LEFT_ALIGN_AND_TRIM_VARIANTS.out)
 
-        GET_CONTAMINATION(SELECT_VARIANTS.out)
+        HAPLOCHECK(SELECT_VARIANTS.out)
 
     emit:
         mutect_vcf        = FILTER_MUTECT_CALLS.out        // channel: [ val(sample_id), vcf, tbi ]
-        contamination     = GET_CONTAMINATION.out          // channel: [ val(sample_id), contam ]
+        contamination     = HAPLOCHECK.out.   txt          // channel: [ val(sample_id), contam ]
         alignment         = CALL_DEFAULT.out.alignment     // channel: [ val(sample_id), bam, bai ]
         alignment_metrics = CALL_DEFAULT.out.algn_metrics  // channel: [ val(sample_id), algn_metrics, theoretical_sensitivity ]
         alignment_wgs     = CALL_DEFAULT.out.wgs_metrics   // channel: [ val(sample_id), wgs_metrics ]
