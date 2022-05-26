@@ -1,14 +1,14 @@
 
 - name: Run all steps in the pipeline with test data.
-  command: nextflow run main.nf -profile test,standard
+  command: nextflow run main.nf -profile docker,ci_test
   files:
     - path: "test-output/all_samples.csv"
-      md5sum: ec7f29d35889db31c150f0d82133afb5
-    - path: "test-output/NA12878.vcf.gz"
+      md5sum: 1cdf4314da122c3462a84aa1d9b27a48
+    - path: "test-output/variants/NA12878.vcf.gz"
       should_exist: True
-    - path: "test-output/NA12878.vcf.gz.tbi"
+    - path: "test-output/variants/NA12878.vcf.gz.tbi"
       should_exist: True
-    - path: "test-output/NA12878.bam"
+    - path: "test-output/alignments/NA12878.sorted.bam"
       should_exist: True
-    - path: "test-output/NA12878.bai"
+    - path: "test-output/alignments/NA12878.sorted.bai"
       should_exist: True

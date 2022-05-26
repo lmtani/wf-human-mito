@@ -181,6 +181,3 @@ Contamination:
 ==PCT_HARDCLIP==: The fraction of PF bases that are (on primary, aligned reads and) hard-clipped, as a fraction of the PF_ALIGNED_BASES (even though these are not aligned!)
 
 ==AVG_POS_3PRIME_SOFTCLIP_LENGTH==: The average length of the soft-clipped bases at the 3' end of reads.
-
-
-

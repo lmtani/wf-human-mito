@@ -1,0 +1,12 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+    -   id: check-yaml
+        args: [--allow-multiple-documents]
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+    -   id: pretty-format-json
+        args: ['--no-sort-keys', '--autofix', '--indent=4']
+    -   id: trailing-whitespace
+    -   id: check-json

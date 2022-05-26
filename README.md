@@ -1,7 +1,6 @@
 # Human Mitochondrial Workflow
 
-This repository contains a [nextflow](https://www.nextflow.io/) workflow for running mitochondrial analysis. This workflow is heavily inspired by the [gatk-workflows/gatk4-mitochondria-pipeline](https://github.com/gatk-workflows/gatk4-mitochondria-pipeline) and by the [epi2me-labs/wf-template](https://github.com/epi2me-labs/wf-template).
-
+This repository contains a [nextflow](https://www.nextflow.io/) workflow for running mitochondrial analysis. This workflow is heavily inspired by the [gatk-workflows/gatk4-mitochondria-pipeline](https://github.com/gatk-workflows/gatk4-mitochondria-pipeline) and by the [nf-core](https://nf-co.re) community.
 
 ## Quickstart
 
@@ -15,7 +14,6 @@ The workflow can currently be run using either
 the required software. Both methods are automated out-of-the-box provided
 either docker or conda is installed.
 
-
 ## Inputs
 
 - Pairs of FASTQ file. One pair for each sample.
@@ -26,7 +24,7 @@ either docker or conda is installed.
 
 To obtain the workflow, having installed `nextflow`, users can run:
 
-```
+```bash
 nextflow run lmtani/wf-human-mito -r main --help
 ```
 
@@ -40,13 +38,10 @@ to see the options for the workflow.
 
 ## Useful links
 
-* [nextflow](https://www.nextflow.io/)
-* [docker](https://www.docker.com/products/docker-desktop)
-* [conda](https://docs.conda.io/en/latest/miniconda.html)
+- [nextflow](https://www.nextflow.io/)
+- [docker](https://www.docker.com/products/docker-desktop)
+- [conda](https://docs.conda.io/en/latest/miniconda.html)
 
-
-### TODOs:
+### TODOs
 
 - [ ] In `COLLECT_WGS_METRICS` process, the input value "readLen" should be dynamic. This info is inside COLLECT_ALIGNMENT_METRICS output.
-
-- [ ] Standardize process and variable name patterns.

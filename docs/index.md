@@ -41,7 +41,7 @@ This is a workflow (written in Nextflow) to analyse mitochondrial sequencing exp
         ./nextflow run lmtani/wf-human-mito \
             --fastq "test_data/*_R{1,2}.fq.gz" \
             --reference /path/to/Homo_sapiens_assembly38.fasta \
-            --out_dir name-your-output-directory
+            --outdir name-your-output-directory
         ```
 
 In the end, you will have variants (VCF) and alignment (BAM) for each sample and a CSV file with information about each sample (coverage, haplogroup, etc). For more details about the meaning of each column, please see the [📦 Outputs section](outputs)
