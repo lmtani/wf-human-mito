@@ -1,5 +1,9 @@
 process BWA_ALIGN_FROM_UBAM {
-    container "taniguti/wf-human-mito:${params.wfversion}"
+
+    conda (params.enable_conda ? "bioconda::picard=2.22.8 bioconda::bwa=0.7.17" : null)
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/mulled-v2-002f51ea92721407ef440b921fb5940f424be842:76d16eabff506ac13338d7f14644a0ad301b9d7e-0' :
+        'quay.io/biocontainers/mulled-v2-002f51ea92721407ef440b921fb5940f424be842:76d16eabff506ac13338d7f14644a0ad301b9d7e-0' }"
 
     input:
         tuple val(sample_id), path(ubam)
