@@ -22,7 +22,7 @@ process BWA_ALIGN_FROM_UBAM {
             FASTQ=/dev/stdout \
             INTERLEAVE=true \
             NON_PF=true | \
-        bwa mem -K 100000000 -p -v 3 -t 5 -Y !{fasta} /dev/stdin - 2> >(tee !{sample_id}.bwa.stderr.log >&2) | \
+        bwa mem -K 100000000 -p -v 3 -t !{task.cpus} -Y !{fasta} /dev/stdin - 2> >(tee !{sample_id}.bwa.stderr.log >&2) | \
         picard MergeBamAlignment \
             VALIDATION_STRINGENCY=SILENT \
             EXPECTED_ORIENTATIONS=FR \
