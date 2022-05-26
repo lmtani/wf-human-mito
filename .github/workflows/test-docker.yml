@@ -1,4 +1,4 @@
-name: nf-core CI
+name: Test pipeline using Docker profile
 # This workflow runs the pipeline with the minimal test dataset to check that it completes without any syntax errors
 on:
   push:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   test:
-    name: Run pipeline with test data
+    name: Run pipeline with test data using docker profile
 
     runs-on: ubuntu-latest
 
@@ -34,4 +34,4 @@ jobs:
           pip install pytest-workflow
 
       - name: Run pipeline with test data
-        run: pytest -v --git-aware .
+        run: pytest --tag docker -v --git-aware .

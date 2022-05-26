@@ -1,5 +1,4 @@
 process LIFTOVER_VCF {
-    // label "human_mito"
 
     conda (params.enable_conda ? "bioconda::picard=2.26.10" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

@@ -8,11 +8,7 @@ The workflow uses [nextflow](https://www.nextflow.io/) to manage compute and
 software resources, as such nextflow will need to be installed before attempting
 to run the workflow.
 
-The workflow can currently be run using either
-[Docker](https://www.docker.com/products/docker-desktop) or
-[conda](https://docs.conda.io/en/latest/miniconda.html) to provide isolation of
-the required software. Both methods are automated out-of-the-box provided
-either docker or conda is installed.
+The workflow can currently be run using either [Docker](https://www.docker.com/products/docker-desktop) or [conda](https://docs.conda.io/en/latest/miniconda.html) to provide isolation of the required software. Both methods are automated out-of-the-box provided either docker or conda is installed.
 
 ## Inputs
 
@@ -22,19 +18,23 @@ either docker or conda is installed.
 
 ## Workflow options
 
-To obtain the workflow, having installed `nextflow`, users can run:
-
 ```bash
+# For help:
 nextflow run lmtani/wf-human-mito -r main --help
-```
 
-to see the options for the workflow.
+# Example:
+nextflow run lmtani/wf-human-mito -r main \
+    --fastq 'fastqs/*_R{1,2}.fq.gz' \
+    --reference /refs/Homo_sapiens_assembly38.fasta \
+    --outdir outdir \
+    -profile conda   # or docker
+```
 
 ## Workflow outputs
 
-- Alignment in BAM format
-- Variants in VCF format
-- JSON with informations, e.g: Haplotype groups (major and minor), coverage, etc.
+- Alignment in BAM format (outdir/alignments/)
+- Variants in VCF format (outdir/variants/)
+- CSV file with informations, e.g: Haplotype groups (major and minor), coverage, etc. for all samples.
 
 ## Useful links
 
