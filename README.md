@@ -10,6 +10,10 @@ to run the workflow.
 
 The workflow can currently be run using either [Docker](https://www.docker.com/products/docker-desktop) or [conda](https://docs.conda.io/en/latest/miniconda.html) to provide isolation of the required software. Both methods are automated out-of-the-box provided either docker or conda is installed.
 
+<p align="center">
+    <img title="Workflow diagram" src="./docs/wf-human-mito-metro.png" width=75%>
+</p>
+
 ## Inputs
 
 - Pairs of FASTQ file. One pair for each sample.
@@ -45,3 +49,5 @@ nextflow run lmtani/wf-human-mito -r main \
 ### TODOs
 
 - [ ] In `COLLECT_WGS_METRICS` process, the input value "readLen" should be dynamic. This info is inside COLLECT_ALIGNMENT_METRICS output.
+
+- [ ] Accept whole genome aligned BAM/CRAM as input
