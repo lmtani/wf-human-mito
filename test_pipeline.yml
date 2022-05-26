@@ -1,4 +1,4 @@
-- name: Run all steps in the pipeline with test data.
+- name: Run all steps in the pipeline with test data using docker profile.
   tags:
     - docker
   command: nextflow run main.nf -profile docker,ci_test
@@ -14,7 +14,7 @@
     - path: "test-output/alignments/NA12878.sorted.bai"
       should_exist: True
 
-- name: Run all steps in the pipeline with test data.
+- name: Run all steps in the pipeline with test data using conda profile.
   tags:
     - conda
   command: nextflow run main.nf -profile conda,ci_test
