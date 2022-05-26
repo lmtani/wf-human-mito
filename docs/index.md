@@ -47,13 +47,11 @@ This is a workflow (written in Nextflow) to analyse mitochondrial sequencing exp
 In the end, you will have variants (VCF) and alignment (BAM) for each sample and a CSV file with information about each sample (coverage, haplogroup, etc). For more details about the meaning of each column, please see the [📦 Outputs section](outputs)
 
 ??? summary "Example"
-    ```sh
-    $ ls name-your-output-directory/
-    all_samples.csv        SAMPLE-B.bam            SAMPLE-D.bai
-    execution              SAMPLE-B.vcf.gz         SAMPLE-D.bam
-    SAMPLE-A.bai           SAMPLE-B.vcf.gz.tbi     SAMPLE-D.vcf.gz
-    SAMPLE-A.bam           SAMPLE-C.bai            SAMPLE-D.vcf.gz.tbi
-    SAMPLE-A.vcf.gz        SAMPLE-C.bam
-    SAMPLE-A.vcf.gz.tbi    SAMPLE-C.vcf.gz
-    SAMPLE-B.bai           SAMPLE-C.vcf.gz.tbi
+    ```bash
+    $ ls -1 name-your-output-directory/
+    alignments/            # Alignments (BAM)
+    all_samples.csv        # Information about each sample
+    execution/             # Pipeline execution details
+    variants/              # Variants (VCF)
+    workspace/             # Outputs of each process in the pipeline
     ```
