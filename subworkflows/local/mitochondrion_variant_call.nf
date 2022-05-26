@@ -18,8 +18,34 @@ workflow variant_call {
     take:
         reads  // channel: [ val(sample_id), ubam ]
     main:
-        CALL_DEFAULT(reads, " -L chrM:576-16024 ", "standard")
-        CALL_SHIFTED(reads, " -L chrM:8025-9144 ", "shifted")
+        CALL_DEFAULT(
+            reads,
+            " -L chrM:576-16024 ",
+            "standard",
+            params.genome.mito_fasta,
+            params.genome.mito_dict,
+            params.genome.mito_index,
+            params.genome.mito_amb,
+            params.genome.mito_ann,
+            params.genome.mito_bwt,
+            params.genome.mito_pac,
+            params.genome.mito_sa,
+            params.genome.mito_fake_alt,
+        )
+        CALL_SHIFTED(
+            reads,
+            " -L chrM:8025-9144 ",
+            "shifted",
+            params.genome.shifted_fasta,
+            params.genome.shifted_dict,
+            params.genome.shifted_index,
+            params.genome.shifted_amb,
+            params.genome.shifted_ann,
+            params.genome.shifted_bwt,
+            params.genome.shifted_pac,
+            params.genome.shifted_sa,
+            params.genome.mito_fake_alt,
+        )
 
         LIFTOVER_VCF(
             CALL_SHIFTED.out.variants,
