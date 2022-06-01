@@ -16,9 +16,12 @@ The workflow can currently be run using either [Docker](https://www.docker.com/p
 
 ## Inputs
 
-- Pairs of FASTQ file. One pair for each sample.
+- Pairs of FASTQ file. One pair for each sample or
+- Alignment file, one per sample. Accepts BAM or CRAM formats.
 - Reference for human genome (GRCh38). [Files are available here](https://console.cloud.google.com/storage/browser/genomics-public-data/references/hg38/v0).
   - .fasta, .dict, .fai, .ann, .amb, .sa, .pac, .alt
+
+> Note: if you are using alignments then you need to use the same version of the mapped reference in the parameter _--reference_. This pipeline only supports versions of GRCh38/Hg38.
 
 ## Running
 
@@ -28,7 +31,8 @@ nextflow run lmtani/wf-human-mito -r main --help
 
 # Example:
 nextflow run lmtani/wf-human-mito -r main \
-    --fastq 'fastqs/*_R{1,2}.fq.gz' \
+    --fastq 'fastqs/*_R{1,2}.fq.gz' \ # ex: sample_R1.fq.gz and sample_R2.fq.gz
+    --alignments 'bams/*.cra{m,i}' \  # ex: sample.cram and sample.crai
     --reference /refs/Homo_sapiens_assembly38.fasta \
     --outdir outdir \
     -profile conda   # or docker
@@ -49,5 +53,3 @@ nextflow run lmtani/wf-human-mito -r main \
 ### TODOs
 
 - [ ] In `COLLECT_WGS_METRICS` process, the input value "readLen" should be dynamic. This info is inside COLLECT_ALIGNMENT_METRICS output.
-
-- [ ] Accept whole genome aligned BAM/CRAM as input

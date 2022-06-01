@@ -10,7 +10,9 @@ include { SORT_SAM                   } from '../../modules/local/picard/sort_sam
 
 
 workflow separate_mitochondrion {
-    take: reads  // channel: [ val(sample_id), [ path(fq_r1), path(fq_r2) ] ]
+    take:
+        reads       // channel: [ val(sample_id), [ path(fq_r1), path(fq_r2) ] ]
+        alignments  // channel: [ val(sample_id), [ path(bam), path(bai) ] ]
     main:
         // Human Reference
         fasta = file("${params.reference}", type:'file', checkIfExists:true)
@@ -24,12 +26,11 @@ workflow separate_mitochondrion {
         alt   = file("${params.reference}.64.alt", type:'file', checkIfExists:true)
 
         GATK4_FASTQTOSAM(reads)
-
         BWA_ALIGN_FROM_UBAM(GATK4_FASTQTOSAM.out, fasta, dict, index, amb, ann, bwt, pac, sa, alt)
-
         SORT_SAM(BWA_ALIGN_FROM_UBAM.out)
 
-        PRINT_READS(SORT_SAM.out, fasta, index, dict)
+        mito_reads_ch = SORT_SAM.out.mix(alignments)
+        PRINT_READS(mito_reads_ch, fasta, index, dict)
 
         SELECT_MITO_READS(PRINT_READS.out, fasta, dict, index)
 
