@@ -21,6 +21,8 @@ The workflow can currently be run using either [Docker](https://www.docker.com/p
 - Reference for human genome (GRCh38). [Files are available here](https://console.cloud.google.com/storage/browser/genomics-public-data/references/hg38/v0).
   - .fasta, .dict, .fai, .ann, .amb, .sa, .pac, .alt
 
+> Note: if you are using alignments then you need to use the same version of the mapped reference in the parameter _--reference_. This pipeline only supports versions of GRCh38/Hg38.
+
 ## Workflow options
 
 ```bash
