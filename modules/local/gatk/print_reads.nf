@@ -16,12 +16,14 @@ process PRINT_READS {
 
     script:
     """
+    BAM=`find -L ./ -name "*.bam" -or -name "*.cram"`  # point to BAM, not BAI, in the gatk
+
     gatk PrintReads \
         -R $fasta \
         -L "chrM" \
         --read-filter MateOnSameContigOrNoMappedMateReadFilter \
         --read-filter MateUnmappedAndUnmappedReadFilter \
-        -I $whole_bam \
+        -I \$BAM \
         -O mito.bam
     """
 }

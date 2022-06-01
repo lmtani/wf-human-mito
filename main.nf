@@ -16,7 +16,8 @@ def helpMessage(){
         nextflow run lmtani/wf-human-mito [options]
 
     Script Options:
-        --fastq        REGEX     Path to FASTQ directory. Quote is required. Ex: "/path/to/fastqs/*_R{1,2}*.fastq.gz" (required)
+        --fastq        REGEX     Path to FASTQ directory. Quote is required. Ex: "/path/to/fastqs/*_R{1,2}*.fastq.gz" (optional if alignments provided)
+        --alignments   REGEX     Path to the directory with alignments in BAM or CRAM format. (optional if fastq provided)
         --reference    FILE      Path to reference (GRCh38). BWA index need to be in same directory (required)
         --outdir       DIR       Path for output (default: $params.outdir)
     """.stripIndent()
@@ -30,10 +31,10 @@ workflow {
         exit 1
     }
 
-    if (!params.fastq) {
+    if ((!params.fastq) && (!params.alignments)){
         helpMessage()
         println("")
-        println("`--fastq` is required")
+        println("`--fastq` or --alignments required")
         exit 1
     }
 
@@ -44,25 +45,18 @@ workflow {
         exit 1
     }
 
+    reads = Channel.empty()
+    alignments = Channel.empty()
 
-    reads = Channel.fromFilePairs("${params.fastq}", glob: true)
+    if (params.fastq) {
+        reads = Channel.fromFilePairs("${params.fastq}", glob: true)
+    }
+    if (params.alignments) {
+        alignments = Channel.fromFilePairs("${params.alignments}", glob: true, flat: true)
+    }
+    alignments.view()
 
-        // TODO: use val(meta)
-        // .map {
-        //     meta, fastq ->
-        //     def fmeta = [:]
-        //     // Set meta.id
-        //     fmeta.id = meta
-        //     // Set meta.single_end
-        //     if (fastq.size() == 1) {
-        //         fmeta.single_end = true
-        //     } else {
-        //         fmeta.single_end = false
-        //     }
-        //     [ fmeta, fastq ]
-        // }
-
-    separate_mitochondrion(reads)
+    separate_mitochondrion(reads, alignments)
 
     variant_call(separate_mitochondrion.out)
 
