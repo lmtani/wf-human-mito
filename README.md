@@ -2,7 +2,7 @@
 
 This repository contains a [nextflow](https://www.nextflow.io/) workflow for running mitochondrial analysis. This workflow is heavily inspired by the [gatk-workflows/gatk4-mitochondria-pipeline](https://github.com/gatk-workflows/gatk4-mitochondria-pipeline) and by the [nf-core](https://nf-co.re) community.
 
-## Quickstart
+## Setup
 
 The workflow uses [nextflow](https://www.nextflow.io/) to manage compute and
 software resources, as such nextflow will need to be installed before attempting
@@ -23,7 +23,7 @@ The workflow can currently be run using either [Docker](https://www.docker.com/p
 
 > Note: if you are using alignments then you need to use the same version of the mapped reference in the parameter _--reference_. This pipeline only supports versions of GRCh38/Hg38.
 
-## Workflow options
+## Running
 
 ```bash
 # For help:
@@ -38,7 +38,7 @@ nextflow run lmtani/wf-human-mito -r main \
     -profile conda   # or docker
 ```
 
-## Workflow outputs
+## Outputs
 
 - Alignment in BAM format (outdir/alignments/)
 - Variants in VCF format (outdir/variants/)
