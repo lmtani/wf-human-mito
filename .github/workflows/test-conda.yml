@@ -34,4 +34,4 @@ jobs:
           pip install pytest-workflow
 
       - name: Run pipeline with test data
-        run: pytest --tag conda -v --git-aware .
+        run: pytest --tag conda -v --git-aware tests/

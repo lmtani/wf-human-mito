@@ -4,7 +4,7 @@
   command: nextflow run main.nf -profile docker,ci_test
   files:
     - path: "test-output/all_samples.csv"
-      md5sum: 12dc6d4b298e65dc350e36fce7f1aa82
+      md5sum: 485508e3cacc4ff1486d484682b616fb
     - path: "test-output/variants/NA12878.vcf.gz"
       should_exist: True
     - path: "test-output/variants/NA12878.vcf.gz.tbi"
@@ -20,7 +20,7 @@
   command: nextflow run main.nf -profile conda,ci_test
   files:
     - path: "test-output/all_samples.csv"
-      md5sum: 12dc6d4b298e65dc350e36fce7f1aa82
+      md5sum: 485508e3cacc4ff1486d484682b616fb
     - path: "test-output/variants/NA12878.vcf.gz"
       should_exist: True
     - path: "test-output/variants/NA12878.vcf.gz.tbi"

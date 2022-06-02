@@ -34,4 +34,4 @@ jobs:
           pip install pytest-workflow
 
       - name: Run pipeline with test data
-        run: pytest --tag docker -v --git-aware .
+        run: pytest --tag docker -v --git-aware tests/
