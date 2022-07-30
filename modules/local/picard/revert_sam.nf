@@ -10,11 +10,17 @@ process SELECT_MITO_READS {
         path fasta
         path dict
         path index
+        val restore_hardclips
 
     output:
         tuple val(sample_id), path("${sample_id}.mito.unaligned.bam")
 
     script:
+    if (!restore_hardclips) {
+        args = "RESTORE_HARDCLIPS=false"
+    } else {
+        args = ""
+    }
     """
     picard RevertSam \
         INPUT=${bam} \
@@ -24,6 +30,7 @@ process SELECT_MITO_READS {
         ATTRIBUTE_TO_CLEAR=FT \
         ATTRIBUTE_TO_CLEAR=CO \
         SORT_ORDER=queryname \
-        RESTORE_ORIGINAL_QUALITIES=false
+        RESTORE_ORIGINAL_QUALITIES=false \
+        ${args}
     """
 }

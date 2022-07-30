@@ -16,10 +16,11 @@ def helpMessage(){
         nextflow run lmtani/wf-human-mito [options]
 
     Script Options:
-        --fastq        REGEX     Path to FASTQ directory. Quote is required. Ex: "/path/to/fastqs/*_R{1,2}*.fastq.gz" (optional if alignments provided)
-        --alignments   REGEX     Path to the directory with alignments in BAM or CRAM format. (optional if fastq provided)
-        --reference    FILE      Path to reference (GRCh38). BWA index need to be in same directory (required)
-        --outdir       DIR       Path for output (default: $params.outdir)
+        --fastq             REGEX     Path to FASTQ directory. Quote is required. Ex: "/path/to/fastqs/*_R{1,2}*.fastq.gz" (optional if alignments provided)
+        --alignments        REGEX     Path to the directory with alignments in BAM or CRAM format. (optional if fastq provided)
+        --reference         FILE      Path to reference (GRCh38). BWA index need to be in same directory (required)
+        --outdir            DIR       Path for output (default: $params.outdir)
+        --restore_hardclips BOOLEAN   When true, restores reads and qualities of records with hard-clips containing XB and XQ tags (useful when your inputs are alignments)
     """.stripIndent()
 }
 
@@ -54,8 +55,8 @@ workflow {
     if (params.alignments) {
         alignments = Channel.fromFilePairs("${params.alignments}", glob: true, flat: true)
     }
-
-    separate_mitochondrion(reads, alignments)
+    println(alignments.view())
+    separate_mitochondrion(reads, alignments, params.restore_hardclips)
 
     variant_call(separate_mitochondrion.out)
 
