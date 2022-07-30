@@ -1,0 +1,9 @@
+# for use with conda (https://docs.conda.io/en/latest/miniconda.html):
+# conda env create -f environment.yml
+name: "nextflow-mamba"
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  - mamba
