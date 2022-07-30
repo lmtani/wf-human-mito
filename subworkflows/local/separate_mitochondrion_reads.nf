@@ -11,8 +11,9 @@ include { SORT_SAM                   } from '../../modules/local/picard/sort_sam
 
 workflow separate_mitochondrion {
     take:
-        reads       // channel: [ val(sample_id), [ path(fq_r1), path(fq_r2) ] ]
-        alignments  // channel: [ val(sample_id), [ path(bam), path(bai) ] ]
+        reads             // channel: [ val(sample_id), [ path(fq_r1), path(fq_r2) ] ]
+        alignments        // channel: [ val(sample_id), [ path(bam), path(bai) ] ]
+        restore_hardclips // channel: [ val(boolean) ]
     main:
         // Human Reference
         fasta = file("${params.reference}", type:'file', checkIfExists:true)
@@ -32,7 +33,7 @@ workflow separate_mitochondrion {
         mito_reads_ch = SORT_SAM.out.mix(alignments)
         PRINT_READS(mito_reads_ch, fasta, index, dict)
 
-        SELECT_MITO_READS(PRINT_READS.out, fasta, dict, index)
+        SELECT_MITO_READS(PRINT_READS.out, fasta, dict, index, restore_hardclips)
 
     emit:
         SELECT_MITO_READS.out  // channel: [ val(sample_id), ubam ]
