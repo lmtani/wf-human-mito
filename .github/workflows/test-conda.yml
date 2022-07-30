@@ -24,6 +24,9 @@ jobs:
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
 
+      - name: Install Mamba
+        run: conda install mamba -n base -c conda-forge
+
       - uses: actions/setup-python@v1
         with:
           python-version: 3.7

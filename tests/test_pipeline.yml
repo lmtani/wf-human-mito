@@ -17,7 +17,7 @@
 - name: Run all steps in the pipeline with test data using conda profile.
   tags:
     - conda
-  command: nextflow run main.nf -profile conda,ci_test
+  command: nextflow run main.nf -profile mamba,ci_test
   files:
     - path: "test-output/all_samples.csv"
       md5sum: 485508e3cacc4ff1486d484682b616fb
