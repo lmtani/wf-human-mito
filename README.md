@@ -2,7 +2,7 @@
 
 This repository contains a [nextflow](https://www.nextflow.io/) workflow for running mitochondrial analysis. This workflow is heavily inspired by the [gatk-workflows/gatk4-mitochondria-pipeline](https://github.com/gatk-workflows/gatk4-mitochondria-pipeline) and by the [nf-core](https://nf-co.re) community.
 
-## Setup
+## 🔧 Setup
 
 The workflow uses [nextflow](https://www.nextflow.io/) to manage compute and
 software resources, as such nextflow will need to be installed before attempting
@@ -14,16 +14,19 @@ The workflow can currently be run using either [Docker](https://www.docker.com/p
     <img title="Workflow diagram" src="./docs/wf-human-mito-metro.png" width=75%>
 </p>
 
-## Inputs
+## 📥 Inputs
 
 - Pairs of FASTQ file. One pair for each sample or
 - Alignment file, one per sample. Accepts BAM or CRAM formats.
-- Reference for human genome (GRCh38). [Files are available here](https://console.cloud.google.com/storage/browser/genomics-public-data/references/hg38/v0).
-  - .fasta, .dict, .fai, .ann, .amb, .sa, .pac, .alt
+- Human Genome Reference - choose the one that best suits your needs.
 
-> Note: if you are using alignments then you need to use the same version of the mapped reference in the parameter _--reference_. This pipeline only supports versions of GRCh38/Hg38.
+### Notes
 
-## Running
+- Allows paired FASTQs, alignments or both.
+- Some of the human genome can be downloaded [here](https://cloud.google.com/life-sciences/docs/resources/public-datasets/reference-genomes), hosted by Google. Example: [GRCh38](https://console.cloud.google.com/storage/browser/genomics-public-data/references/hg38/v0). This workflow needs to have access to *.fasta, .dict, .fai, 64.ann, 64.amb, 64.sa, 64.pac, 64.alt* files.
+- The *--reference* parameter must point to the same reference of the input alignments.
+
+## ⚙ Running
 
 ```bash
 # For help:
@@ -38,11 +41,12 @@ nextflow run lmtani/wf-human-mito -r main \
     -profile conda   # or docker
 ```
 
-## Outputs
+## 📤 Outputs
 
-- Alignment in BAM format (outdir/alignments/)
-- Variants in VCF format (outdir/variants/)
+- Alignment in BAM format (*outdir/alignments/*)
+- Variants in VCF format (*outdir/variants/*)
 - CSV file with informations, e.g: Haplotype groups (major and minor), coverage, etc. for all samples.
+- All intermediate outputs (ex: *outdir/workspace/bwa_align_from_ubam/* contains all whole genome alignments)
 
 ## Useful links
 
