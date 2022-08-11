@@ -2,11 +2,11 @@
 // Aligns paired FASTQ reads into the human reference and selects
 // reads from mitochondrial genome.
 //
-include { BWA_ALIGN_FROM_UBAM        } from '../../modules/local/custom/bwa_align_from_ubam.nf'
-include { GATK4_FASTQTOSAM           } from '../../modules/local/gatk/fastq_to_sam.nf'
-include { PRINT_READS                } from '../../modules/local/gatk/print_reads.nf'
-include { SELECT_MITO_READS          } from '../../modules/local/picard/revert_sam.nf'
-include { SORT_SAM                   } from '../../modules/local/picard/sort_sam.nf'
+include { BWA_ALIGN_FROM_UBAM as ALIGN_RAW_READS  } from '../../modules/local/custom/bwa_align_from_ubam.nf'
+include { GATK4_FASTQTOSAM                        } from '../../modules/local/gatk/fastq_to_sam.nf'
+include { PRINT_READS                             } from '../../modules/local/gatk/print_reads.nf'
+include { SELECT_MITO_READS                       } from '../../modules/local/picard/revert_sam.nf'
+include { SORT_SAM                                } from '../../modules/local/picard/sort_sam.nf'
 
 
 workflow separate_mitochondrion {
@@ -26,9 +26,10 @@ workflow separate_mitochondrion {
         pac   = file("${params.reference}.64.pac", type:'file', checkIfExists:true)
         alt   = file("${params.reference}.64.alt", type:'file', checkIfExists:true)
 
+        print(fasta)
         GATK4_FASTQTOSAM(reads)
-        BWA_ALIGN_FROM_UBAM(GATK4_FASTQTOSAM.out, fasta, dict, index, amb, ann, bwt, pac, sa, alt)
-        SORT_SAM(BWA_ALIGN_FROM_UBAM.out)
+        ALIGN_RAW_READS(GATK4_FASTQTOSAM.out, fasta, dict, index, amb, ann, bwt, pac, sa, alt)
+        SORT_SAM(ALIGN_RAW_READS.out)
 
         mito_reads_ch = SORT_SAM.out.mix(alignments)
         PRINT_READS(mito_reads_ch, fasta, index, dict)

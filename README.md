@@ -46,7 +46,7 @@ nextflow run lmtani/wf-human-mito -r main \
 - Alignment in BAM format (*outdir/alignments/*)
 - Variants in VCF format (*outdir/variants/*)
 - CSV file with informations, e.g: Haplotype groups (major and minor), coverage, etc. for all samples.
-- All intermediate outputs (ex: *outdir/workspace/bwa_align_from_ubam/* contains all whole genome alignments)
+- All intermediate outputs (ex: *outdir/workspace/align_raw_reads/* contains all whole genome alignments)
 
 ## Useful links
 
