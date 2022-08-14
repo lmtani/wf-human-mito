@@ -23,7 +23,7 @@ The workflow can currently be run using either [Docker](https://www.docker.com/p
 ### Notes
 
 - Allows paired FASTQs, alignments or both.
-- Some of the human genome can be downloaded [here](https://cloud.google.com/life-sciences/docs/resources/public-datasets/reference-genomes), hosted by Google. Example: [GRCh38](https://console.cloud.google.com/storage/browser/genomics-public-data/references/hg38/v0). This workflow needs to have access to *.fasta, .dict, .fai, 64.ann, 64.amb, 64.sa, 64.pac, 64.alt* files.
+- Some of the human genome references can be downloaded [here](https://cloud.google.com/life-sciences/docs/resources/public-datasets/reference-genomes), hosted by Google. Example: [GRCh38](https://console.cloud.google.com/storage/browser/genomics-public-data/references/hg38/v0). This workflow needs to have access to *.fasta, .dict, .fai, 64.ann, 64.amb, 64.sa, 64.pac, 64.alt* files.
 - The *--reference* parameter must point to the same reference of the input alignments.
 
 ## ⚙ Running
