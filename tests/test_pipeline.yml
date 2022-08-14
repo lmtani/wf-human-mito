@@ -1,7 +1,7 @@
 - name: Run all steps in the pipeline with test data using docker profile.
   tags:
     - docker
-  command: nextflow run main.nf -profile docker,ci_test
+  command: nextflow run main.nf -profile docker,ci,test
   files:
     - path: "test-output/all_samples.csv"
       md5sum: 485508e3cacc4ff1486d484682b616fb
@@ -16,8 +16,8 @@
 
 - name: Run all steps in the pipeline with test data using conda profile.
   tags:
-    - conda
-  command: nextflow run main.nf -profile mamba,ci_test
+    - mamba
+  command: nextflow run main.nf -profile mamba,ci,test_19
   files:
     - path: "test-output/all_samples.csv"
       md5sum: 485508e3cacc4ff1486d484682b616fb

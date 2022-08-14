@@ -29,4 +29,4 @@ jobs:
           environment-file: ./.github/environment.yml
 
       - name: Run pipeline with test data
-        run: nextflow run main.nf -profile mamba,ci_test
+        run: pytest --tag mamba -v --git-aware tests/

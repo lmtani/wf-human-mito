@@ -26,7 +26,6 @@ workflow separate_mitochondrion {
         pac   = file("${params.reference}.64.pac", type:'file', checkIfExists:true)
         alt   = file("${params.reference}.64.alt", type:'file', checkIfExists:true)
 
-        print(fasta)
         GATK4_FASTQTOSAM(reads)
         ALIGN_RAW_READS(GATK4_FASTQTOSAM.out, fasta, dict, index, amb, ann, bwt, pac, sa, alt)
         SORT_SAM(ALIGN_RAW_READS.out)
