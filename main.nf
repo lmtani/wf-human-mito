@@ -55,7 +55,7 @@ workflow {
     if (params.alignments) {
         alignments = Channel.fromFilePairs("${params.alignments}", glob: true, flat: true)
     }
-    println(alignments.view())
+
     separate_mitochondrion(reads, alignments, params.restore_hardclips)
 
     variant_call(separate_mitochondrion.out)

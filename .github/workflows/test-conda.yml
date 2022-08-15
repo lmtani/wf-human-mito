@@ -27,6 +27,8 @@ jobs:
       - uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: ./.github/environment.yml
+      - name: Install pytest-workflow
+        run: pip install pytest-workflow
 
       - name: Run pipeline with test data
-        run: nextflow run main.nf -profile mamba,ci_test
+        run: pytest --tag mamba -v --git-aware tests/

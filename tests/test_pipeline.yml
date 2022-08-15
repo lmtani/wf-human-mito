@@ -1,31 +1,47 @@
 - name: Run all steps in the pipeline with test data using docker profile.
   tags:
     - docker
-  command: nextflow run main.nf -profile docker,ci_test
+  command: nextflow run main.nf -profile docker,ci,test
   files:
-    - path: "test-output/all_samples.csv"
-      md5sum: 485508e3cacc4ff1486d484682b616fb
-    - path: "test-output/variants/NA12878.vcf.gz"
+    - path: "test-output-38/all_samples.csv"
+      md5sum: b730e0899dc39a5cefd65e0513087b12
+    - path: "test-output-38/variants/NA12878.vcf.gz"
       should_exist: True
-    - path: "test-output/variants/NA12878.vcf.gz.tbi"
+    - path: "test-output-38/variants/NA12878.vcf.gz.tbi"
       should_exist: True
-    - path: "test-output/alignments/NA12878.sorted.bam"
+    - path: "test-output-38/alignments/NA12878.sorted.bam"
       should_exist: True
-    - path: "test-output/alignments/NA12878.sorted.bai"
+    - path: "test-output-38/alignments/NA12878.sorted.bai"
       should_exist: True
+    - path: "test-output-38/workspace/haplocheck/NA12878-algn.raw.txt"
+      contains:
+        - "H13a1a1a"
+        - "NA12878"
+    - path: "test-output-38/workspace/haplocheck/NA12878.raw.txt"
+      contains:
+        - "H13a1a1a"
+        - "NA12878"
 
 - name: Run all steps in the pipeline with test data using conda profile.
   tags:
-    - conda
-  command: nextflow run main.nf -profile mamba,ci_test
+    - mamba
+  command: nextflow run main.nf -profile mamba,ci,test_19
   files:
-    - path: "test-output/all_samples.csv"
-      md5sum: 485508e3cacc4ff1486d484682b616fb
-    - path: "test-output/variants/NA12878.vcf.gz"
+    - path: "test-output-19/all_samples.csv"
+      md5sum: b64a2a03c5cf0375dad039c40c9e075d
+    - path: "test-output-19/variants/NA12878.vcf.gz"
       should_exist: True
-    - path: "test-output/variants/NA12878.vcf.gz.tbi"
+    - path: "test-output-19/variants/NA12878.vcf.gz.tbi"
       should_exist: True
-    - path: "test-output/alignments/NA12878.sorted.bam"
+    - path: "test-output-19/alignments/NA12878.sorted.bam"
       should_exist: True
-    - path: "test-output/alignments/NA12878.sorted.bai"
+    - path: "test-output-19/alignments/NA12878.sorted.bai"
       should_exist: True
+    - path: "test-output-19/workspace/haplocheck/NA12878-algn.raw.txt"
+      contains:
+        - "H13a1a1a"
+        - "NA12878"
+    - path: "test-output-19/workspace/haplocheck/NA12878.raw.txt"
+      contains:
+        - "H13a1a1a"
+        - "NA12878"

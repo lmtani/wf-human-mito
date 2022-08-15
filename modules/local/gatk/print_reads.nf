@@ -18,9 +18,12 @@ process PRINT_READS {
     """
     BAM=`find -L ./ -name "*.bam" -or -name "*.cram"`  # point to BAM, not BAI, in the gatk
 
+    # Uses the ref.dict to infer if the mitochondrial genome is named MT or chrMT
+    CHROM_NAME=`grep -q "MT" $dict && echo "MT" || echo "chrM"`
+
     gatk PrintReads \
         -R $fasta \
-        -L "chrM" \
+        -L "\$CHROM_NAME" \
         --read-filter MateOnSameContigOrNoMappedMateReadFilter \
         --read-filter MateUnmappedAndUnmappedReadFilter \
         -I \$BAM \
