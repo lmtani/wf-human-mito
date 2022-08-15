@@ -3,7 +3,7 @@
     - docker
   command: nextflow run main.nf -profile docker,ci,test
   files:
-    - path: "test-output/all_samples.csv"
+    - path: "test-output-38/all_samples.csv"
       md5sum: b730e0899dc39a5cefd65e0513087b12
     - path: "test-output-38/variants/NA12878.vcf.gz"
       should_exist: True
@@ -27,7 +27,7 @@
     - mamba
   command: nextflow run main.nf -profile mamba,ci,test_19
   files:
-    - path: "test-output/all_samples.csv"
+    - path: "test-output-19/all_samples.csv"
       md5sum: c1e79706c1e0fd883a5a28432885d191
     - path: "test-output-19/variants/NA12878.vcf.gz"
       should_exist: True
