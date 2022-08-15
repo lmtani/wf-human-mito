@@ -28,7 +28,7 @@
   command: nextflow run main.nf -profile mamba,ci,test_19
   files:
     - path: "test-output-19/all_samples.csv"
-      md5sum: c1e79706c1e0fd883a5a28432885d191
+      md5sum: b64a2a03c5cf0375dad039c40c9e075d
     - path: "test-output-19/variants/NA12878.vcf.gz"
       should_exist: True
     - path: "test-output-19/variants/NA12878.vcf.gz.tbi"
