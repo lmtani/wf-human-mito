@@ -5,19 +5,19 @@
   files:
     - path: "test-output/all_samples.csv"
       md5sum: b730e0899dc39a5cefd65e0513087b12
-    - path: "test-output/variants/NA12878.vcf.gz"
+    - path: "test-output-38/variants/NA12878.vcf.gz"
       should_exist: True
-    - path: "test-output/variants/NA12878.vcf.gz.tbi"
+    - path: "test-output-38/variants/NA12878.vcf.gz.tbi"
       should_exist: True
-    - path: "test-output/alignments/NA12878.sorted.bam"
+    - path: "test-output-38/alignments/NA12878.sorted.bam"
       should_exist: True
-    - path: "test-output/alignments/NA12878.sorted.bai"
+    - path: "test-output-38/alignments/NA12878.sorted.bai"
       should_exist: True
-    - path: "test-output/workspace/haplocheck/NA12878-algn.raw.txt"
+    - path: "test-output-38/workspace/haplocheck/NA12878-algn.raw.txt"
       contains:
         - "H13a1a1a"
         - "NA12878"
-    - path: "test-output/workspace/haplocheck/NA12878.raw.txt"
+    - path: "test-output-38/workspace/haplocheck/NA12878.raw.txt"
       contains:
         - "H13a1a1a"
         - "NA12878"
@@ -29,19 +29,19 @@
   files:
     - path: "test-output/all_samples.csv"
       md5sum: c1e79706c1e0fd883a5a28432885d191
-    - path: "test-output/variants/NA12878.vcf.gz"
+    - path: "test-output-19/variants/NA12878.vcf.gz"
       should_exist: True
-    - path: "test-output/variants/NA12878.vcf.gz.tbi"
+    - path: "test-output-19/variants/NA12878.vcf.gz.tbi"
       should_exist: True
-    - path: "test-output/alignments/NA12878.sorted.bam"
+    - path: "test-output-19/alignments/NA12878.sorted.bam"
       should_exist: True
-    - path: "test-output/alignments/NA12878.sorted.bai"
+    - path: "test-output-19/alignments/NA12878.sorted.bai"
       should_exist: True
-    - path: "test-output/workspace/haplocheck/NA12878-algn.raw.txt"
+    - path: "test-output-19/workspace/haplocheck/NA12878-algn.raw.txt"
       contains:
         - "H13a1a1a"
         - "NA12878"
-    - path: "test-output/workspace/haplocheck/NA12878.raw.txt"
+    - path: "test-output-19/workspace/haplocheck/NA12878.raw.txt"
       contains:
         - "H13a1a1a"
         - "NA12878"
