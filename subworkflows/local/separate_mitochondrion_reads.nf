@@ -3,10 +3,11 @@
 // reads from mitochondrial genome.
 //
 include { BWA_ALIGN_FROM_UBAM as ALIGN_RAW_READS  } from '../../modules/local/custom/bwa_align_from_ubam.nf'
-include { GATK4_FASTQTOSAM                        } from '../../modules/local/gatk/fastq_to_sam.nf'
+include { GATK4_FASTQTOSAM                        } from '../../modules/nf-core/gatk4/fastqtosam/main'
 include { PRINT_READS                             } from '../../modules/local/gatk/print_reads.nf'
 include { SELECT_MITO_READS                       } from '../../modules/local/picard/revert_sam.nf'
-include { SORT_SAM                                } from '../../modules/local/picard/sort_sam.nf'
+include { PICARD_SORTSAM                          } from '../../modules/nf-core/picard/sortsam/main'
+include { SAMTOOLS_INDEX                          } from '../../modules/nf-core/samtools/index/main'
 
 
 workflow separate_mitochondrion {
@@ -26,15 +27,49 @@ workflow separate_mitochondrion {
         pac   = file("${params.reference}.64.pac", type:'file', checkIfExists:true)
         alt   = file("${params.reference}.64.alt", type:'file', checkIfExists:true)
 
-        GATK4_FASTQTOSAM(reads)
-        ALIGN_RAW_READS(GATK4_FASTQTOSAM.out, fasta, dict, index, amb, ann, bwt, pac, sa, alt)
-        SORT_SAM(ALIGN_RAW_READS.out)
+        ch_versions = Channel.empty()
 
-        mito_reads_ch = SORT_SAM.out.mix(alignments)
+        sample = reads.map {create_fastq_channel(it) }
+
+        GATK4_FASTQTOSAM(sample)
+        ch_versions = ch_versions.mix(GATK4_FASTQTOSAM.out.versions)
+
+        ALIGN_RAW_READS(GATK4_FASTQTOSAM.out.bam, fasta, dict, index, amb, ann, bwt, pac, sa, alt)
+        ch_versions = ch_versions.mix(ALIGN_RAW_READS.out.versions)
+
+        PICARD_SORTSAM(ALIGN_RAW_READS.out.bam, "coordinate")
+        ch_versions = ch_versions.mix(PICARD_SORTSAM.out.versions)
+
+        SAMTOOLS_INDEX(PICARD_SORTSAM.out.bam)
+        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
+
+        // Join the mapped bam + bai paths by their keys
+        bam_sorted_indexed = PICARD_SORTSAM.out.bam.join(SAMTOOLS_INDEX.out.bai)
+
+        // Add provided alignments to the reads channel
+        mito_reads_ch = bam_sorted_indexed.mix(alignments)
+
         PRINT_READS(mito_reads_ch, fasta, index, dict)
+        ch_versions = ch_versions.mix(PRINT_READS.out.versions)
 
-        SELECT_MITO_READS(PRINT_READS.out, fasta, dict, index, restore_hardclips)
+        SELECT_MITO_READS(PRINT_READS.out.bam, fasta, dict, index, restore_hardclips)
+        ch_versions = ch_versions.mix(SELECT_MITO_READS.out.versions)
 
     emit:
-        SELECT_MITO_READS.out  // channel: [ val(sample_id), ubam ]
+        bam      = SELECT_MITO_READS.out.bam  // channel: [ val(meta), ubam ]
+        versions = ch_versions                // channel: [ versions.yml ]
+}
+
+
+def create_fastq_channel(item) {
+    // create meta map
+    def meta = [:]
+    meta.id           = item[0]
+    meta.single_end   = false
+
+    // add path(s) of the fastq file(s) to the meta map
+    def fastq_meta = []
+    fastq_meta = [ meta, [ file(item[1][0]), file(item[1][1]) ] ]
+
+    return fastq_meta
 }

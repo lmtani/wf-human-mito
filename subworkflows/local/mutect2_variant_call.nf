@@ -6,7 +6,7 @@ include { CALL_MUTECT                        } from '../../modules/local/gatk/mu
 include { COLLECT_WGS_METRICS                } from '../../modules/local/picard/collect_wgs_metrics.nf'
 include { COLLECT_ALIGNMENT_METRICS          } from '../../modules/local/picard/collect_alignment_summary_metrics.nf'
 include { MARK_DUPLICATES                    } from '../../modules/local/picard/mark_duplicates.nf'
-include { SORT_SAM                           } from '../../modules/local/picard/sort_sam.nf'
+include { SORT_SAM                           } from '../../modules/local/picard/sort_sam.nf'  // TODO: use PICARD_SORTSAM instead
 
 
 workflow CALL_VARIANTS {

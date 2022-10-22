@@ -58,12 +58,14 @@ workflow {
 
     separate_mitochondrion(reads, alignments, params.restore_hardclips)
 
-    variant_call(separate_mitochondrion.out)
+    // variant_call(separate_mitochondrion.out)
 
-    make_report(
-        variant_call.out.contamination,
-        variant_call.out.alignment_metrics,
-        variant_call.out.alignment_wgs,
-        variant_call.out.dup_metrics
-    )
+    // make_report(
+    //     variant_call.out.contamination,
+    //     variant_call.out.alignment_metrics,
+    //     variant_call.out.alignment_wgs,
+    //     variant_call.out.dup_metrics
+    // )
+
+    separate_mitochondrion.out.versions.unique().collectFile(name: 'versions.yml').view{it}
 }

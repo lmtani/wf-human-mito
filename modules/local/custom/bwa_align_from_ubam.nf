@@ -1,5 +1,5 @@
 process BWA_ALIGN_FROM_UBAM {
-    tag "$sample_id"
+    tag "$meta.id"
 
     conda (params.enable_conda ? "bioconda::picard=2.22.8 bioconda::bwa=0.7.17" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -7,7 +7,7 @@ process BWA_ALIGN_FROM_UBAM {
         'quay.io/biocontainers/mulled-v2-002f51ea92721407ef440b921fb5940f424be842:76d16eabff506ac13338d7f14644a0ad301b9d7e-0' }"
 
     input:
-        tuple val(sample_id), path(ubam)
+        tuple val(meta), path(ubam)
         path fasta
         path dict
         path index
@@ -18,11 +18,12 @@ process BWA_ALIGN_FROM_UBAM {
         path sa
         path ref_alt
     output:
-        tuple val(sample_id), path("${sample_id}.temp.bam")
+        tuple val(meta), path("${meta.id}.temp.bam"), emit: bam
+        path "versions.yml"                         , emit: versions
 
     shell:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${sample_id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def reads_ubam = ubam
 
     def avail_mem = 3
@@ -37,7 +38,7 @@ process BWA_ALIGN_FROM_UBAM {
             FASTQ=/dev/stdout \
             INTERLEAVE=true \
             NON_PF=true | \
-        bwa mem -K 100000000 -p -v 3 -t ${task.cpus} -Y ${fasta} /dev/stdin - 2> >(tee ${sample_id}.bwa.stderr.log >&2) | \
+        bwa mem -K 100000000 -p -v 3 -t ${task.cpus} -Y ${fasta} /dev/stdin - 2> >(tee ${meta.id}.bwa.stderr.log >&2) | \
         picard -Xmx${avail_mem}g MergeBamAlignment \
             VALIDATION_STRINGENCY=SILENT \
             EXPECTED_ORIENTATIONS=FR \
@@ -46,7 +47,7 @@ process BWA_ALIGN_FROM_UBAM {
             ATTRIBUTES_TO_REMOVE=MD \
             ALIGNED_BAM=/dev/stdin \
             UNMAPPED_BAM=${reads_ubam} \
-            OUTPUT=${sample_id}.temp.bam \
+            OUTPUT=${meta.id}.temp.bam \
             REFERENCE_SEQUENCE=${fasta} \
             SORT_ORDER="unsorted" \
             IS_BISULFITE_SEQUENCE=false \
@@ -60,5 +61,12 @@ process BWA_ALIGN_FROM_UBAM {
             ALIGNER_PROPER_PAIR_FLAGS=true \
             UNMAP_CONTAMINANT_READS=true \
             ADD_PG_TAG_TO_READS=false
+
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        picard: \$(picard MergeBamAlignment --version 2> >(grep -v LC_ALL))
+        bwa: \$(bwa 2> >(grep Version | cut -d " " -f 2))
+    END_VERSIONS
     """
 }
