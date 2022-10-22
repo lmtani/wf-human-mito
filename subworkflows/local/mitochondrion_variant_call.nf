@@ -16,7 +16,7 @@ include {
 
 workflow variant_call {
     take:
-        reads  // channel: [ val(sample_id), ubam ]
+        reads  // channel: [ val(meta), ubam ]
     main:
         CALL_DEFAULT(
             reads,
@@ -47,42 +47,42 @@ workflow variant_call {
             params.genome.mito_fake_alt,
         )
 
-        LIFTOVER_VCF(
-            CALL_SHIFTED.out.variants,
-            params.genome.mito_fasta,
-            params.genome.mito_index,
-            params.genome.mito_dict,
-            params.genome.shift_back_chain,
-        )
+    //     LIFTOVER_VCF(
+    //         CALL_SHIFTED.out.variants,
+    //         params.genome.mito_fasta,
+    //         params.genome.mito_index,
+    //         params.genome.mito_dict,
+    //         params.genome.shift_back_chain,
+    //     )
 
-        MERGE_VCFS(CALL_DEFAULT.out.variants.join(LIFTOVER_VCF.out))
-        MERGE_STATS(CALL_DEFAULT.out.mutect_stats.join(CALL_SHIFTED.out.mutect_stats))
+    //     MERGE_VCFS(CALL_DEFAULT.out.variants.join(LIFTOVER_VCF.out))
+    //     MERGE_STATS(CALL_DEFAULT.out.mutect_stats.join(CALL_SHIFTED.out.mutect_stats))
 
-        FILTER_MUTECT_CALLS(
-            MERGE_VCFS.out.join(MERGE_STATS.out),
-            params.genome.mito_fasta,
-            params.genome.mito_index,
-            params.genome.mito_dict,
-            params.genome.blacklist,
-            params.genome.blacklist_index
-        )
+    //     FILTER_MUTECT_CALLS(
+    //         MERGE_VCFS.out.join(MERGE_STATS.out),
+    //         params.genome.mito_fasta,
+    //         params.genome.mito_index,
+    //         params.genome.mito_dict,
+    //         params.genome.blacklist,
+    //         params.genome.blacklist_index
+    //     )
 
-        LEFT_ALIGN_AND_TRIM_VARIANTS(
-            params.genome.mito_fasta,
-            params.genome.mito_index,
-            params.genome.mito_dict,
-            FILTER_MUTECT_CALLS.out
-        )
+    //     LEFT_ALIGN_AND_TRIM_VARIANTS(
+    //         params.genome.mito_fasta,
+    //         params.genome.mito_index,
+    //         params.genome.mito_dict,
+    //         FILTER_MUTECT_CALLS.out
+    //     )
 
-        SELECT_VARIANTS(LEFT_ALIGN_AND_TRIM_VARIANTS.out)
+    //     SELECT_VARIANTS(LEFT_ALIGN_AND_TRIM_VARIANTS.out)
 
-        HAPLOCHECK(SELECT_VARIANTS.out)
+    //     HAPLOCHECK(SELECT_VARIANTS.out)
 
-    emit:
-        mutect_vcf        = FILTER_MUTECT_CALLS.out        // channel: [ val(sample_id), vcf, tbi ]
-        contamination     = HAPLOCHECK.out.   txt          // channel: [ val(sample_id), contam ]
+    // emit:
+    //     mutect_vcf        = FILTER_MUTECT_CALLS.out        // channel: [ val(sample_id), vcf, tbi ]
+    //     contamination     = HAPLOCHECK.out.   txt          // channel: [ val(sample_id), contam ]
         alignment         = CALL_DEFAULT.out.alignment     // channel: [ val(sample_id), bam, bai ]
-        alignment_metrics = CALL_DEFAULT.out.algn_metrics  // channel: [ val(sample_id), algn_metrics, theoretical_sensitivity ]
-        alignment_wgs     = CALL_DEFAULT.out.wgs_metrics   // channel: [ val(sample_id), wgs_metrics ]
+        // alignment_metrics = CALL_DEFAULT.out.algn_metrics  // channel: [ val(sample_id), algn_metrics, theoretical_sensitivity ]
+        // alignment_wgs     = CALL_DEFAULT.out.wgs_metrics   // channel: [ val(sample_id), wgs_metrics ]
         dup_metrics       = CALL_DEFAULT.out.dup_metrics   // channel: [ val(sample_id), dup_metrics ]
 }

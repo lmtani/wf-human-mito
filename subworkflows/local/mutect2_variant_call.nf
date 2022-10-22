@@ -2,16 +2,17 @@
 // Call mitochondrial variants for the given interval
 //
 include { BWA_ALIGN_FROM_UBAM as ALIGN_MITO  } from '../../modules/local/custom/bwa_align_from_ubam.nf'
-include { CALL_MUTECT                        } from '../../modules/local/gatk/mutect2.nf'
 include { COLLECT_WGS_METRICS                } from '../../modules/local/picard/collect_wgs_metrics.nf'
-include { COLLECT_ALIGNMENT_METRICS          } from '../../modules/local/picard/collect_alignment_summary_metrics.nf'
-include { MARK_DUPLICATES                    } from '../../modules/local/picard/mark_duplicates.nf'
-include { SORT_SAM                           } from '../../modules/local/picard/sort_sam.nf'  // TODO: use PICARD_SORTSAM instead
+include { PICARD_SORTSAM                     } from '../../modules/nf-core/picard/sortsam/main'
+include { PICARD_MARKDUPLICATES              } from '../../modules/nf-core/picard/markduplicates/main'
+include { PICARD_COLLECTMULTIPLEMETRICS      } from '../../modules/nf-core/picard/collectmultiplemetrics/main'
+include { GATK4_MUTECT2                      } from '../../modules/nf-core/gatk4/mutect2/main'
+include { SAMTOOLS_INDEX                     } from '../../modules/nf-core/samtools/index/main'
 
 
 workflow CALL_VARIANTS {
     take:
-        reads     // channel: [ val(sample_id), ubam ]
+        reads     // channel: [ val(meta), ubam ]
         interval  // channel: val(interval)
         prefix    // channel: val(name)
         fasta
@@ -25,6 +26,8 @@ workflow CALL_VARIANTS {
         fasta_alt
 
     main:
+        ch_versions = Channel.empty()
+
         ALIGN_MITO(
                 reads,
                 fasta,
@@ -37,22 +40,32 @@ workflow CALL_VARIANTS {
                 fasta_sa,
                 fasta_alt
         )
+        ch_versions = ch_versions.mix(ALIGN_MITO.out.versions)
 
-        MARK_DUPLICATES(ALIGN_MITO.out)
+        PICARD_MARKDUPLICATES(ALIGN_MITO.out.bam, fasta, fasta_fai)
+        ch_versions = ch_versions.mix(PICARD_MARKDUPLICATES.out.versions)
 
-        SORT_SAM(MARK_DUPLICATES.out.bam)
+        PICARD_SORTSAM(PICARD_MARKDUPLICATES.out.bam, "coordinate")
+        ch_versions = ch_versions.mix(PICARD_SORTSAM.out.versions)
 
-        COLLECT_ALIGNMENT_METRICS(SORT_SAM.out, fasta, fasta_dict, fasta_fai)
+        SAMTOOLS_INDEX(PICARD_SORTSAM.out.bam)
+        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
 
-        COLLECT_WGS_METRICS(SORT_SAM.out, fasta, 300)  //TODO: parse READ_LENGTH value
+        PICARD_COLLECTMULTIPLEMETRICS(PICARD_SORTSAM.out.bam, fasta, fasta_fai)
+        ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions)
 
-        CALL_MUTECT(SORT_SAM.out, fasta, fasta_dict, fasta_fai, prefix, interval)
+        mutect_inputs = PICARD_SORTSAM.out.bam.join(SAMTOOLS_INDEX.out.bai).map{ it -> [ it[0], it[1], it[2], [] ] }
+        GATK4_MUTECT2(mutect_inputs, fasta, fasta_fai, fasta_dict, [], [], [], [])
+        ch_versions = ch_versions.mix(GATK4_MUTECT2.out.versions)
 
     emit:
-        variants             = CALL_MUTECT.out.vcf            // channel: [ val(sample_id), vcf, tbi ]
-        mutect_stats         = CALL_MUTECT.out.stats          // channel: [ val(sample_id), stats ]
-        wgs_metrics          = COLLECT_WGS_METRICS.out        // channel: [ val(sample_id), theoretical_sensibility, metrics ]
-        algn_metrics         = COLLECT_ALIGNMENT_METRICS.out  // channel: [ val(sample_id), metrics ]
-        alignment            = SORT_SAM.out                   // channel: [ val(sample_id), bam, bai ]
-        dup_metrics          = MARK_DUPLICATES.out.metrics    // channel: [ val(sample_id), metrics ]
+        // variants             = CALL_MUTECT.out.vcf            // channel: [ val(sample_id), vcf, tbi ]
+        // mutect_stats         = CALL_MUTECT.out.stats          // channel: [ val(sample_id), stats ]
+        // wgs_metrics          = COLLECT_WGS_METRICS.out        // channel: [ val(sample_id), theoretical_sensibility, metrics ]
+        // algn_metrics         = COLLECT_ALIGNMENT_METRICS.out  // channel: [ val(sample_id), metrics ]
+        alignment                = PICARD_SORTSAM.out.bam                   // channel: [ val(sample_id), bam, bai ]
+        dup_metrics              = PICARD_MARKDUPLICATES.out.metrics    // channel: [ val(sample_id), metrics ]
+        txt_metrics              = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
+        pdf_metrics              = PICARD_COLLECTMULTIPLEMETRICS.out.pdf
+        versions                 = ch_versions                // channel: [ versions.yml ]
 }

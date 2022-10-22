@@ -48,6 +48,7 @@ workflow {
 
     reads = Channel.empty()
     alignments = Channel.empty()
+    ch_versions = Channel.empty()
 
     if (params.fastq) {
         reads = Channel.fromFilePairs("${params.fastq}", glob: true)
@@ -57,8 +58,10 @@ workflow {
     }
 
     separate_mitochondrion(reads, alignments, params.restore_hardclips)
+    ch_versions = ch_versions.mix(separate_mitochondrion.out.versions)
 
-    // variant_call(separate_mitochondrion.out)
+    variant_call(separate_mitochondrion.out.bam)
+    // ch_versions = ch_versions.mix(variant_call.out.versions)
 
     // make_report(
     //     variant_call.out.contamination,
@@ -67,5 +70,5 @@ workflow {
     //     variant_call.out.dup_metrics
     // )
 
-    separate_mitochondrion.out.versions.unique().collectFile(name: 'versions.yml').view{it}
+    ch_versions.unique().collectFile(name: 'versions.yml').view{it}
 }
