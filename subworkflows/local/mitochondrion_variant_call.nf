@@ -2,16 +2,14 @@
 // Call mitochondrial variants, using shifted approach
 // described in https://gnomad.broadinstitute.org/news/2020-11-gnomad-v3-1-mitochondrial-dna-variants/#mtdna-calling-pipeline-for-single-samples
 //
-include { MERGE_STATS                             } from '../../modules/local/gatk/merge_mutect_stats.nf'
 include { HAPLOCHECK                              } from '../../modules/local/haplocheck/haplocheck.nf'
-include { LIFTOVER_VCF                            } from '../../modules/local/picard/liftover_vcf.nf'
 include { MERGE_VCFS                              } from '../../modules/local/picard/merge_vcfs.nf'
-include { FILTER_MUTECT_CALLS                     } from '../../modules/local/gatk/mitochondrial_variants_filter.nf'
-include { LEFT_ALIGN_AND_TRIM_VARIANTS            } from '../../modules/local/gatk/left_align_and_trim_variants.nf'
+include { GATK4_VARIANTFILTRATION                 } from '../../modules/nf-core/gatk4/variantfiltration/main'
 include { SELECT_VARIANTS                         } from '../../modules/local/gatk/select_variants.nf'
 include { PICARD_LIFTOVERVCF                      } from '../../modules/nf-core/picard/liftovervcf/main'
 include { GATK4_MERGEMUTECTSTATS                  } from '../../modules/nf-core/gatk4/mergemutectstats/main'
 include { GATK4_FILTERMUTECTCALLS                 } from '../../modules/nf-core/gatk4/filtermutectcalls/main'
+include { GATK4_LEFTALIGNANDTRIMVARIANTS          } from '../../modules/nf-core/gatk4/leftalignandtrimvariants/main'
 include {
         CALL_VARIANTS as CALL_DEFAULT;
         CALL_VARIANTS as CALL_SHIFTED             } from '../../subworkflows/local/mutect2_variant_call.nf'
@@ -76,22 +74,23 @@ workflow variant_call {
         ch_versions = ch_versions.mix(GATK4_MERGEMUTECTSTATS.out.versions)
 
 
-        // TODO: migrate to GATK4_FILTERMUTECTCALLS
-        FILTER_MUTECT_CALLS(
-            MERGE_VCFS.out.join(MERGE_STATS.out),
-            params.genome.mito_fasta,
-            params.genome.mito_index,
-            params.genome.mito_dict,
-            params.genome.blacklist,
-            params.genome.blacklist_index
+        // TODO: migrate to GATK4_FILTERMUTECTCALLS and GATK4_VARIANTFILTRATION
+        filter_variants_channel = MERGE_VCFS.out.vcf.join(MERGE_VCFS.out.idx).join(GATK4_MERGEMUTECTSTATS.out.stats).map( it ->
+            [ it[0], it[1], it[2], it[3], [], [], [], [] ]
         )
+        GATK4_FILTERMUTECTCALLS(filter_variants_channel, params.genome.mito_fasta, params.genome.mito_index, params.genome.mito_dict)
+        ch_versions = ch_versions.mix(GATK4_FILTERMUTECTCALLS.out.versions)
 
-    //     LEFT_ALIGN_AND_TRIM_VARIANTS(
-    //         params.genome.mito_fasta,
-    //         params.genome.mito_index,
-    //         params.genome.mito_dict,
-    //         FILTER_MUTECT_CALLS.out
-    //     )
+
+        GATK4_VARIANTFILTRATION(GATK4_FILTERMUTECTCALLS.out.vcf.join(GATK4_FILTERMUTECTCALLS.out.tbi), params.genome.mito_fasta, params.genome.mito_index, params.genome.mito_dict)
+        ch_versions = ch_versions.mix(GATK4_VARIANTFILTRATION.out.versions)
+
+
+        left_align_channel = GATK4_VARIANTFILTRATION.out.vcf.join(GATK4_VARIANTFILTRATION.out.tbi).map( it ->
+            [ it[0], it[1], it[2], []]
+        )
+        GATK4_LEFTALIGNANDTRIMVARIANTS(left_align_channel, params.genome.mito_fasta, params.genome.mito_index, params.genome.mito_dict)
+        ch_versions = ch_versions.mix(GATK4_LEFTALIGNANDTRIMVARIANTS.out.versions)
 
     //     SELECT_VARIANTS(LEFT_ALIGN_AND_TRIM_VARIANTS.out)
 

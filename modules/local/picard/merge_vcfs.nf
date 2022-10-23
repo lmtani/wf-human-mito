@@ -9,16 +9,16 @@ process MERGE_VCFS {
         tuple val(meta), path(vcf1), path(vcf2)
 
     output:
-        tuple val(meta), path("${meta.id}.merged.vcf")       , emit: vcf
-        tuple val(meta), path("${meta.id}.merged.vcf.idx")   , emit: idx
-        path "versions.yml"                                  , emit: versions
+        tuple val(meta), path("${meta.id}.merged.vcf.gz")       , emit: vcf
+        tuple val(meta), path("${meta.id}.merged.vcf.gz.tbi")   , emit: idx
+        path "versions.yml"                                     , emit: versions
 
     script:
     """
     picard MergeVcfs \
         I=${vcf1} \
         I=${vcf2} \
-        O=${meta.id}.merged.vcf
+        O=${meta.id}.merged.vcf.gz
 
 
     cat <<-END_VERSIONS > versions.yml
