@@ -2,11 +2,10 @@
 // Call mitochondrial variants for the given interval
 //
 include { BWA_ALIGN_FROM_UBAM as ALIGN_MITO  } from '../../modules/local/custom/bwa_align_from_ubam.nf'
-include { COLLECT_WGS_METRICS                } from '../../modules/local/picard/collect_wgs_metrics.nf'
-include { PICARD_SORTSAM                     } from '../../modules/nf-core/picard/sortsam/main'
-include { PICARD_MARKDUPLICATES              } from '../../modules/nf-core/picard/markduplicates/main'
-include { PICARD_COLLECTMULTIPLEMETRICS      } from '../../modules/nf-core/picard/collectmultiplemetrics/main'
 include { GATK4_MUTECT2                      } from '../../modules/nf-core/gatk4/mutect2/main'
+include { PICARD_COLLECTMULTIPLEMETRICS      } from '../../modules/nf-core/picard/collectmultiplemetrics/main'
+include { PICARD_MARKDUPLICATES              } from '../../modules/nf-core/picard/markduplicates/main'
+include { PICARD_SORTSAM                     } from '../../modules/nf-core/picard/sortsam/main'
 include { SAMTOOLS_INDEX                     } from '../../modules/nf-core/samtools/index/main'
 
 
@@ -59,13 +58,11 @@ workflow CALL_VARIANTS {
         ch_versions = ch_versions.mix(GATK4_MUTECT2.out.versions)
 
     emit:
-        vcf                     = GATK4_MUTECT2.out.vcf            // channel: [ val(sample_id), vcf, tbi ]
-        mutect_stats            = GATK4_MUTECT2.out.stats          // channel: [ val(sample_id), stats ]
-        // wgs_metrics          = COLLECT_WGS_METRICS.out        // channel: [ val(sample_id), theoretical_sensibility, metrics ]
-        // algn_metrics         = COLLECT_ALIGNMENT_METRICS.out  // channel: [ val(sample_id), metrics ]
-        alignment                = PICARD_SORTSAM.out.bam                   // channel: [ val(sample_id), bam, bai ]
-        dup_metrics              = PICARD_MARKDUPLICATES.out.metrics    // channel: [ val(sample_id), metrics ]
-        txt_metrics              = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
-        pdf_metrics              = PICARD_COLLECTMULTIPLEMETRICS.out.pdf
-        versions                 = ch_versions                // channel: [ versions.yml ]
+        alignment    = mutect_inputs                               // channel: [ val(meta), bam, bai ]
+        dup_metrics  = PICARD_MARKDUPLICATES.out.metrics           // channel: [ val(meta), metrics ]
+        mutect_stats = GATK4_MUTECT2.out.stats                     // channel: [ val(meta), stats ]
+        pdf_metrics  = PICARD_COLLECTMULTIPLEMETRICS.out.pdf
+        txt_metrics  = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
+        vcf          = GATK4_MUTECT2.out.vcf                       // channel: [ val(meta), vcf, tbi ]
+        versions     = ch_versions                                 // channel: [ versions.yml ]
 }

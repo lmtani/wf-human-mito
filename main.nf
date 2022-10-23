@@ -61,14 +61,12 @@ workflow {
     ch_versions = ch_versions.mix(separate_mitochondrion.out.versions)
 
     variant_call(separate_mitochondrion.out.bam)
-    // ch_versions = ch_versions.mix(variant_call.out.versions)
+    ch_versions = ch_versions.mix(variant_call.out.versions)
 
-    // make_report(
-    //     variant_call.out.contamination,
-    //     variant_call.out.alignment_metrics,
-    //     variant_call.out.alignment_wgs,
-    //     variant_call.out.dup_metrics
-    // )
+    make_report(
+        variant_call.out.contamination,
+        variant_call.out.dup_metrics
+    )
 
     ch_versions.unique().collectFile(name: 'versions.yml').view{it}
 }

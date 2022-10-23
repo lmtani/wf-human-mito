@@ -6,20 +6,14 @@ process CREATE_JSON {
         'quay.io/biocontainers/python:3.9--1' }"
 
     input:
-        tuple \
-            val(sample_id),
-            path(contam_metrics),
-            path(algn_metrics),
-            path(wgs_metrics),
-            path(theoretical_sensitivity),
-            path(dup_metrics)
+        tuple val(meta), path(contam_metrics), path(dup_metrics)
 
     output:
-        path "${sample_id}.summary.json"
+        path "${meta.id}.summary.json"
 
     script:
     """
-    prepare_json.py $dup_metrics $wgs_metrics $algn_metrics $contam_metrics
-    mv summary.json ${sample_id}.summary.json
+    prepare_json.py $dup_metrics $contam_metrics
+    mv summary.json ${meta.id}.summary.json
     """
 }

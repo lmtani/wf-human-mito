@@ -4,10 +4,10 @@
 //
 include { BWA_ALIGN_FROM_UBAM as ALIGN_RAW_READS  } from '../../modules/local/custom/bwa_align_from_ubam.nf'
 include { GATK4_FASTQTOSAM                        } from '../../modules/nf-core/gatk4/fastqtosam/main'
-include { PRINT_READS                             } from '../../modules/local/gatk/print_reads.nf'
-include { SELECT_MITO_READS                       } from '../../modules/local/picard/revert_sam.nf'
 include { PICARD_SORTSAM                          } from '../../modules/nf-core/picard/sortsam/main'
+include { PRINT_READS                             } from '../../modules/local/gatk/print_reads.nf'
 include { SAMTOOLS_INDEX                          } from '../../modules/nf-core/samtools/index/main'
+include { SELECT_MITO_READS                       } from '../../modules/local/picard/revert_sam.nf'
 
 
 workflow separate_mitochondrion {

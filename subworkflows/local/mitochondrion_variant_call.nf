@@ -2,17 +2,17 @@
 // Call mitochondrial variants, using shifted approach
 // described in https://gnomad.broadinstitute.org/news/2020-11-gnomad-v3-1-mitochondrial-dna-variants/#mtdna-calling-pipeline-for-single-samples
 //
-include { HAPLOCHECK                              } from '../../modules/local/haplocheck/haplocheck.nf'
-include { MERGE_VCFS                              } from '../../modules/local/picard/merge_vcfs.nf'
-include { GATK4_VARIANTFILTRATION                 } from '../../modules/nf-core/gatk4/variantfiltration/main'
-include { SELECT_VARIANTS                         } from '../../modules/local/gatk/select_variants.nf'
-include { PICARD_LIFTOVERVCF                      } from '../../modules/nf-core/picard/liftovervcf/main'
-include { GATK4_MERGEMUTECTSTATS                  } from '../../modules/nf-core/gatk4/mergemutectstats/main'
-include { GATK4_FILTERMUTECTCALLS                 } from '../../modules/nf-core/gatk4/filtermutectcalls/main'
-include { GATK4_LEFTALIGNANDTRIMVARIANTS          } from '../../modules/nf-core/gatk4/leftalignandtrimvariants/main'
 include {
-        CALL_VARIANTS as CALL_DEFAULT;
-        CALL_VARIANTS as CALL_SHIFTED             } from '../../subworkflows/local/mutect2_variant_call.nf'
+          CALL_VARIANTS as CALL_DEFAULT;
+          CALL_VARIANTS as CALL_SHIFTED    } from '../../subworkflows/local/mutect2_variant_call.nf'
+include { GATK4_FILTERMUTECTCALLS          } from '../../modules/nf-core/gatk4/filtermutectcalls/main'
+include { GATK4_LEFTALIGNANDTRIMVARIANTS   } from '../../modules/nf-core/gatk4/leftalignandtrimvariants/main'
+include { GATK4_MERGEMUTECTSTATS           } from '../../modules/nf-core/gatk4/mergemutectstats/main'
+include { GATK4_SELECTVARIANTS             } from '../../modules/nf-core/gatk4/selectvariants/main'
+include { GATK4_VARIANTFILTRATION          } from '../../modules/nf-core/gatk4/variantfiltration/main'
+include { HAPLOCHECK                       } from '../../modules/nf-core/haplocheck/main'
+include { MERGE_VCFS                       } from '../../modules/local/picard/merge_vcfs.nf'
+include { PICARD_LIFTOVERVCF               } from '../../modules/nf-core/picard/liftovervcf/main'
 
 
 workflow variant_call {
@@ -92,15 +92,16 @@ workflow variant_call {
         GATK4_LEFTALIGNANDTRIMVARIANTS(left_align_channel, params.genome.mito_fasta, params.genome.mito_index, params.genome.mito_dict)
         ch_versions = ch_versions.mix(GATK4_LEFTALIGNANDTRIMVARIANTS.out.versions)
 
-    //     SELECT_VARIANTS(LEFT_ALIGN_AND_TRIM_VARIANTS.out)
+        GATK4_SELECTVARIANTS(GATK4_LEFTALIGNANDTRIMVARIANTS.out.vcf.join(GATK4_LEFTALIGNANDTRIMVARIANTS.out.tbi))
+        ch_versions = ch_versions.mix(GATK4_SELECTVARIANTS.out.versions)
 
-    //     HAPLOCHECK(SELECT_VARIANTS.out)
+        HAPLOCHECK(GATK4_SELECTVARIANTS.out.vcf)
+        ch_versions = ch_versions.mix(HAPLOCHECK.out.versions)
 
-    // emit:
-    //     mutect_vcf        = FILTER_MUTECT_CALLS.out        // channel: [ val(sample_id), vcf, tbi ]
-    //     contamination     = HAPLOCHECK.out.   txt          // channel: [ val(sample_id), contam ]
-        alignment         = CALL_DEFAULT.out.alignment     // channel: [ val(sample_id), bam, bai ]
-        // alignment_metrics = CALL_DEFAULT.out.algn_metrics  // channel: [ val(sample_id), algn_metrics, theoretical_sensitivity ]
-        // alignment_wgs     = CALL_DEFAULT.out.wgs_metrics   // channel: [ val(sample_id), wgs_metrics ]
-        dup_metrics       = CALL_DEFAULT.out.dup_metrics   // channel: [ val(sample_id), dup_metrics ]
+    emit:
+        alignment         = CALL_DEFAULT.out.alignment                                                // channel: [ val(sample_id), bam, bai ]
+        contamination     = HAPLOCHECK.out.txt                                                        // channel: [ val(sample_id), contam ]
+        dup_metrics       = CALL_DEFAULT.out.dup_metrics                                              // channel: [ val(sample_id), dup_metrics ]
+        mutect_vcf        = GATK4_FILTERMUTECTCALLS.out.vcf.join(GATK4_FILTERMUTECTCALLS.out.tbi)     // channel: [ val(sample_id), vcf, tbi ]
+        versions          = ch_versions
 }
