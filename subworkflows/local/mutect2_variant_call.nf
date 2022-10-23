@@ -59,8 +59,8 @@ workflow CALL_VARIANTS {
         ch_versions = ch_versions.mix(GATK4_MUTECT2.out.versions)
 
     emit:
-        // variants             = CALL_MUTECT.out.vcf            // channel: [ val(sample_id), vcf, tbi ]
-        // mutect_stats         = CALL_MUTECT.out.stats          // channel: [ val(sample_id), stats ]
+        vcf                     = GATK4_MUTECT2.out.vcf            // channel: [ val(sample_id), vcf, tbi ]
+        mutect_stats            = GATK4_MUTECT2.out.stats          // channel: [ val(sample_id), stats ]
         // wgs_metrics          = COLLECT_WGS_METRICS.out        // channel: [ val(sample_id), theoretical_sensibility, metrics ]
         // algn_metrics         = COLLECT_ALIGNMENT_METRICS.out  // channel: [ val(sample_id), metrics ]
         alignment                = PICARD_SORTSAM.out.bam                   // channel: [ val(sample_id), bam, bai ]

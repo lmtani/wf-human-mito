@@ -9,6 +9,9 @@ include { MERGE_VCFS                              } from '../../modules/local/pi
 include { FILTER_MUTECT_CALLS                     } from '../../modules/local/gatk/mitochondrial_variants_filter.nf'
 include { LEFT_ALIGN_AND_TRIM_VARIANTS            } from '../../modules/local/gatk/left_align_and_trim_variants.nf'
 include { SELECT_VARIANTS                         } from '../../modules/local/gatk/select_variants.nf'
+include { PICARD_LIFTOVERVCF                      } from '../../modules/nf-core/picard/liftovervcf/main'
+include { GATK4_MERGEMUTECTSTATS                  } from '../../modules/nf-core/gatk4/mergemutectstats/main'
+include { GATK4_FILTERMUTECTCALLS                 } from '../../modules/nf-core/gatk4/filtermutectcalls/main'
 include {
         CALL_VARIANTS as CALL_DEFAULT;
         CALL_VARIANTS as CALL_SHIFTED             } from '../../subworkflows/local/mutect2_variant_call.nf'
@@ -18,6 +21,9 @@ workflow variant_call {
     take:
         reads  // channel: [ val(meta), ubam ]
     main:
+
+        ch_versions = Channel.empty()
+
         CALL_DEFAULT(
             reads,
             " -L chrM:576-16024 ",
@@ -32,6 +38,8 @@ workflow variant_call {
             params.genome.mito_sa,
             params.genome.mito_fake_alt,
         )
+        ch_versions = ch_versions.mix(CALL_DEFAULT.out.versions)
+
         CALL_SHIFTED(
             reads,
             " -L chrM:8025-9144 ",
@@ -46,26 +54,37 @@ workflow variant_call {
             params.genome.shifted_sa,
             params.genome.mito_fake_alt,
         )
+        ch_versions = ch_versions.mix(CALL_SHIFTED.out.versions)
 
-    //     LIFTOVER_VCF(
-    //         CALL_SHIFTED.out.variants,
-    //         params.genome.mito_fasta,
-    //         params.genome.mito_index,
-    //         params.genome.mito_dict,
-    //         params.genome.shift_back_chain,
-    //     )
+        PICARD_LIFTOVERVCF(
+            CALL_SHIFTED.out.vcf,
+            params.genome.mito_dict,
+            params.genome.shift_back_chain,
+            params.genome.mito_fasta
+        )
+        ch_versions = ch_versions.mix(PICARD_LIFTOVERVCF.out.versions)
 
-    //     MERGE_VCFS(CALL_DEFAULT.out.variants.join(LIFTOVER_VCF.out))
-    //     MERGE_STATS(CALL_DEFAULT.out.mutect_stats.join(CALL_SHIFTED.out.mutect_stats))
 
-    //     FILTER_MUTECT_CALLS(
-    //         MERGE_VCFS.out.join(MERGE_STATS.out),
-    //         params.genome.mito_fasta,
-    //         params.genome.mito_index,
-    //         params.genome.mito_dict,
-    //         params.genome.blacklist,
-    //         params.genome.blacklist_index
-    //     )
+        vcfs_channel = CALL_DEFAULT.out.vcf.join(PICARD_LIFTOVERVCF.out.vcf_lifted)
+        MERGE_VCFS(vcfs_channel)
+        ch_versions = ch_versions.mix(MERGE_VCFS.out.versions)
+
+        stats_channel = CALL_DEFAULT.out.mutect_stats.join(CALL_SHIFTED.out.mutect_stats).map { it ->
+            [ it[0], [ it[1], it[2] ] ]
+        }
+        GATK4_MERGEMUTECTSTATS(stats_channel)
+        ch_versions = ch_versions.mix(GATK4_MERGEMUTECTSTATS.out.versions)
+
+
+        // TODO: migrate to GATK4_FILTERMUTECTCALLS
+        FILTER_MUTECT_CALLS(
+            MERGE_VCFS.out.join(MERGE_STATS.out),
+            params.genome.mito_fasta,
+            params.genome.mito_index,
+            params.genome.mito_dict,
+            params.genome.blacklist,
+            params.genome.blacklist_index
+        )
 
     //     LEFT_ALIGN_AND_TRIM_VARIANTS(
     //         params.genome.mito_fasta,

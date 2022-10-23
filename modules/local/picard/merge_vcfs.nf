@@ -6,18 +6,24 @@ process MERGE_VCFS {
         'quay.io/biocontainers/picard:2.26.10--hdfd78af_0' }"
 
     input:
-        tuple val(sample_id), path(vcf1), path(tbi1), path(vcf2), path(tbi2)
+        tuple val(meta), path(vcf1), path(vcf2)
 
     output:
-        tuple val(sample_id), \
-            path("${sample_id}.merged.vcf"), \
-            path("${sample_id}.merged.vcf.idx")
+        tuple val(meta), path("${meta.id}.merged.vcf")       , emit: vcf
+        tuple val(meta), path("${meta.id}.merged.vcf.idx")   , emit: idx
+        path "versions.yml"                                  , emit: versions
 
     script:
     """
     picard MergeVcfs \
         I=${vcf1} \
         I=${vcf2} \
-        O=${sample_id}.merged.vcf
+        O=${meta.id}.merged.vcf
+
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        picard: \$(picard MergeVcfs --version 2> >(grep -v LC_ALL))
+    END_VERSIONS
     """
 }
