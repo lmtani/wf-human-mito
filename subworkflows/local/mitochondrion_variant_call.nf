@@ -54,41 +54,28 @@ workflow variant_call {
         )
         ch_versions = ch_versions.mix(CALL_SHIFTED.out.versions)
 
-        PICARD_LIFTOVERVCF(
-            CALL_SHIFTED.out.vcf,
-            params.genome.mito_dict,
-            params.genome.shift_back_chain,
-            params.genome.mito_fasta
-        )
+        PICARD_LIFTOVERVCF(CALL_SHIFTED.out.vcf, params.genome.mito_dict, params.genome.shift_back_chain, params.genome.mito_fasta)
         ch_versions = ch_versions.mix(PICARD_LIFTOVERVCF.out.versions)
-
 
         vcfs_channel = CALL_DEFAULT.out.vcf.join(PICARD_LIFTOVERVCF.out.vcf_lifted)
         MERGE_VCFS(vcfs_channel)
         ch_versions = ch_versions.mix(MERGE_VCFS.out.versions)
 
-        stats_channel = CALL_DEFAULT.out.mutect_stats.join(CALL_SHIFTED.out.mutect_stats).map { it ->
-            [ it[0], [ it[1], it[2] ] ]
-        }
+        stats_channel = CALL_DEFAULT.out.mutect_stats.join(CALL_SHIFTED.out.mutect_stats).map { it -> [ it[0], [ it[1], it[2] ] ]}
         GATK4_MERGEMUTECTSTATS(stats_channel)
         ch_versions = ch_versions.mix(GATK4_MERGEMUTECTSTATS.out.versions)
 
-
-        // TODO: migrate to GATK4_FILTERMUTECTCALLS and GATK4_VARIANTFILTRATION
         filter_variants_channel = MERGE_VCFS.out.vcf.join(MERGE_VCFS.out.idx).join(GATK4_MERGEMUTECTSTATS.out.stats).map( it ->
             [ it[0], it[1], it[2], it[3], [], [], [], [] ]
         )
         GATK4_FILTERMUTECTCALLS(filter_variants_channel, params.genome.mito_fasta, params.genome.mito_index, params.genome.mito_dict)
         ch_versions = ch_versions.mix(GATK4_FILTERMUTECTCALLS.out.versions)
 
-
-        GATK4_VARIANTFILTRATION(GATK4_FILTERMUTECTCALLS.out.vcf.join(GATK4_FILTERMUTECTCALLS.out.tbi), params.genome.mito_fasta, params.genome.mito_index, params.genome.mito_dict)
+        variantfiltration_channel = GATK4_FILTERMUTECTCALLS.out.vcf.join(GATK4_FILTERMUTECTCALLS.out.tbi)
+        GATK4_VARIANTFILTRATION(variantfiltration_channel, params.genome.mito_fasta, params.genome.mito_index, params.genome.mito_dict)
         ch_versions = ch_versions.mix(GATK4_VARIANTFILTRATION.out.versions)
 
-
-        left_align_channel = GATK4_VARIANTFILTRATION.out.vcf.join(GATK4_VARIANTFILTRATION.out.tbi).map( it ->
-            [ it[0], it[1], it[2], []]
-        )
+        left_align_channel = GATK4_VARIANTFILTRATION.out.vcf.join(GATK4_VARIANTFILTRATION.out.tbi).map( it -> [ it[0], it[1], it[2], []] )
         GATK4_LEFTALIGNANDTRIMVARIANTS(left_align_channel, params.genome.mito_fasta, params.genome.mito_index, params.genome.mito_dict)
         ch_versions = ch_versions.mix(GATK4_LEFTALIGNANDTRIMVARIANTS.out.versions)
 
