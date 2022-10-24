@@ -29,7 +29,8 @@ workflow separate_mitochondrion {
 
         ch_versions = Channel.empty()
 
-        sample = reads.map {create_fastq_channel(it) }
+        // Create channel with 'meta' info
+        sample = reads.map( it -> { [ [id:it[0], single_end:false], [ file(it[1][0]), file(it[1][1]) ] ] } )
 
         GATK4_FASTQTOSAM(sample)
         ch_versions = ch_versions.mix(GATK4_FASTQTOSAM.out.versions)
@@ -58,18 +59,4 @@ workflow separate_mitochondrion {
     emit:
         bam      = SELECT_MITO_READS.out.bam  // channel: [ val(meta), ubam ]
         versions = ch_versions                // channel: [ versions.yml ]
-}
-
-
-def create_fastq_channel(item) {
-    // create meta map
-    def meta = [:]
-    meta.id           = item[0]
-    meta.single_end   = false
-
-    // add path(s) of the fastq file(s) to the meta map
-    def fastq_meta = []
-    fastq_meta = [ meta, [ file(item[1][0]), file(item[1][1]) ] ]
-
-    return fastq_meta
 }
