@@ -54,7 +54,9 @@ workflow {
         reads = Channel.fromFilePairs("${params.fastq}", glob: true)
     }
     if (params.alignments) {
-        alignments = Channel.fromFilePairs("${params.alignments}", glob: true, flat: true)
+        alignments = Channel.fromFilePairs("${params.alignments}", glob: true, flat: true).map( it ->
+            [ [id: it[0]], it[2], it[1] ]
+        )
     }
 
     separate_mitochondrion(reads, alignments, params.restore_hardclips)

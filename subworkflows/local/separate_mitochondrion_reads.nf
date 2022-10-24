@@ -12,8 +12,8 @@ include { SELECT_MITO_READS                       } from '../../modules/local/pi
 
 workflow separate_mitochondrion {
     take:
-        reads             // channel: [ val(sample_id), [ path(fq_r1), path(fq_r2) ] ]
-        alignments        // channel: [ val(sample_id), [ path(bam), path(bai) ] ]
+        reads             // channel: [ val(meta), [ path(fq_r1), path(fq_r2) ] ]
+        alignments        // channel: [ val(meta), [ path(bam), path(bai) ] ]
         restore_hardclips // channel: [ val(boolean) ]
     main:
         // Human Reference
