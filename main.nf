@@ -3,10 +3,11 @@
 nextflow.enable.dsl = 2
 
 
-include { separate_mitochondrion } from './subworkflows/local/separate_mitochondrion_reads.nf'
-include { variant_call           } from './subworkflows/local/mitochondrion_variant_call.nf'
-include { make_report            } from './subworkflows/local/make_report.nf'
-
+include { separate_mitochondrion      } from './subworkflows/local/separate_mitochondrion_reads.nf'
+include { variant_call                } from './subworkflows/local/mitochondrion_variant_call.nf'
+include { make_report                 } from './subworkflows/local/make_report.nf'
+include { MULTIQC                     } from './modules/nf-core/multiqc/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS } from './modules/nf-core/custom/dumpsoftwareversions/main'
 
 def helpMessage(){
     log.info """
@@ -64,11 +65,15 @@ workflow {
 
     variant_call(separate_mitochondrion.out.bam)
     ch_versions = ch_versions.mix(variant_call.out.versions)
+    ch_reports = ch_versions.mix(variant_call.out.reports)
 
     make_report(
         variant_call.out.contamination,
-        variant_call.out.dup_metrics
     )
 
-    ch_versions.unique().collectFile(name: 'versions.yml').view{it}
+
+    ch_version_yaml = CUSTOM_DUMPSOFTWAREVERSIONS(ch_versions.unique().collectFile(name: 'versions.yml'))
+    ch_multiqc_files =  Channel.empty().mix(ch_version_yaml, ch_reports.collect().ifEmpty([]))
+
+    MULTIQC(ch_multiqc_files.collect(), [], [], [])
 }

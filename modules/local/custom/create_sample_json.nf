@@ -6,14 +6,14 @@ process CREATE_JSON {
         'quay.io/biocontainers/python:3.9--1' }"
 
     input:
-        tuple val(meta), path(contam_metrics), path(dup_metrics)
+        tuple val(meta), path(contam_metrics)
 
     output:
         path "${meta.id}.summary.json"
 
     script:
     """
-    prepare_json.py $dup_metrics $contam_metrics
+    prepare_json.py $contam_metrics
     mv summary.json ${meta.id}.summary.json
     """
 }

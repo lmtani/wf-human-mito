@@ -18,12 +18,11 @@ def parse_two_lines_metrics(path, keys: int, values: int):
     return {k:v for k,v in zip(header, values)}
 
 
-def main(dup_metrics, contamination_metrics):
-    dup = parse_two_lines_metrics(dup_metrics, 6, 7)
+def main(contamination_metrics):
     contam = parse_two_lines_metrics(contamination_metrics, 0, 1)
 
     with open("summary.json", "w") as f:
-        json.dump(dict(**dup, **contam), f, indent=4)
+        json.dump(contam, f, indent=4)
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1])

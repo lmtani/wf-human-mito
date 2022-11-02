@@ -13,13 +13,17 @@ include { GATK4_VARIANTFILTRATION          } from '../../modules/nf-core/gatk4/v
 include { HAPLOCHECK                       } from '../../modules/nf-core/haplocheck/main'
 include { MERGE_VCFS                       } from '../../modules/local/picard/merge_vcfs.nf'
 include { PICARD_LIFTOVERVCF               } from '../../modules/nf-core/picard/liftovervcf/main'
-
+include { MOSDEPTH                         } from '../../modules/nf-core/mosdepth/main'
 
 workflow variant_call {
     take:
         reads  // channel: [ val(meta), ubam ]
     main:
 
+        // To gather all QC reports for MultiQC
+        ch_reports  = Channel.empty()
+
+        // To gather used softwares versions for MultiQC
         ch_versions = Channel.empty()
 
         CALL_DEFAULT(
@@ -57,6 +61,14 @@ workflow variant_call {
         PICARD_LIFTOVERVCF(CALL_SHIFTED.out.vcf, params.genome.mito_dict, params.genome.shift_back_chain, params.genome.mito_fasta)
         ch_versions = ch_versions.mix(PICARD_LIFTOVERVCF.out.versions)
 
+        MOSDEPTH(CALL_DEFAULT.out.alignment.map { it -> [ it[0], it[1], it[2] ]}, [], params.genome.mito_fasta)
+        ch_versions = ch_versions.mix(MOSDEPTH.out.versions)
+        mosdepth_metrics = MOSDEPTH.out.global_txt
+                                       .join(MOSDEPTH.out.summary_txt)
+                                       .join(MOSDEPTH.out.per_base_bed)
+                                       .join(MOSDEPTH.out.per_base_csi)
+        ch_reports = ch_reports.mix(mosdepth_metrics.map { it -> [ it[1], it[2], it[3], it[4] ]})
+
         vcfs_channel = CALL_DEFAULT.out.vcf.join(PICARD_LIFTOVERVCF.out.vcf_lifted)
         MERGE_VCFS(vcfs_channel)
         ch_versions = ch_versions.mix(MERGE_VCFS.out.versions)
@@ -85,10 +97,14 @@ workflow variant_call {
         HAPLOCHECK(GATK4_SELECTVARIANTS.out.vcf)
         ch_versions = ch_versions.mix(HAPLOCHECK.out.versions)
 
+        ch_reports = ch_reports
+                            .mix(CALL_DEFAULT.out.dup_metrics.map { it -> [ it[1] ]})
+                            .mix(CALL_DEFAULT.out.txt_metrics.map{ it -> it[1] })
+
     emit:
-        alignment         = CALL_DEFAULT.out.alignment                                                // channel: [ val(sample_id), bam, bai ]
-        contamination     = HAPLOCHECK.out.txt                                                        // channel: [ val(sample_id), contam ]
-        dup_metrics       = CALL_DEFAULT.out.dup_metrics                                              // channel: [ val(sample_id), dup_metrics ]
-        mutect_vcf        = GATK4_FILTERMUTECTCALLS.out.vcf.join(GATK4_FILTERMUTECTCALLS.out.tbi)     // channel: [ val(sample_id), vcf, tbi ]
-        versions          = ch_versions
+        alignment          = CALL_DEFAULT.out.alignment                                                // channel: [ val(sample_id), bam, bai ]
+        contamination      = HAPLOCHECK.out.txt                                                        // channel: [ val(sample_id), contam ]
+        mutect_vcf         = GATK4_FILTERMUTECTCALLS.out.vcf.join(GATK4_FILTERMUTECTCALLS.out.tbi)     // channel: [ val(sample_id), vcf, tbi ]
+        reports            = ch_reports
+        versions           = ch_versions
 }

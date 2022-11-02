@@ -25,6 +25,10 @@ workflow CALL_VARIANTS {
         fasta_alt
 
     main:
+        // To gather all QC reports for MultiQC
+        ch_reports  = Channel.empty()
+
+        // To gather used softwares versions for MultiQC
         ch_versions = Channel.empty()
 
         ALIGN_MITO(
