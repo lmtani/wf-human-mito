@@ -7,7 +7,7 @@ include { separate_mitochondrion      } from './subworkflows/local/separate_mito
 include { variant_call                } from './subworkflows/local/mitochondrion_variant_call.nf'
 include { make_report                 } from './subworkflows/local/make_report.nf'
 include { MULTIQC                     } from './modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from './modules/nf-core/custom/dumpsoftwareversions/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS } from './modules/local/custom/dumpsoftwareversions/main'
 
 def helpMessage(){
     log.info """
@@ -50,6 +50,7 @@ workflow {
     reads = Channel.empty()
     alignments = Channel.empty()
     ch_versions = Channel.empty()
+    ch_multiqc_files =  Channel.empty()
 
     if (params.fastq) {
         reads = Channel.fromFilePairs("${params.fastq}", glob: true)
@@ -67,13 +68,14 @@ workflow {
     ch_versions = ch_versions.mix(variant_call.out.versions)
     ch_reports = ch_versions.mix(variant_call.out.reports)
 
-    make_report(
-        variant_call.out.contamination,
+    make_report(variant_call.out.contamination)
+    
+    CUSTOM_DUMPSOFTWAREVERSIONS(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
+    ch_multiqc_files = ch_multiqc_files.mix(
+        variant_call.out.multiqc_rename.unique().collectFile(name: 'rename_samples.tsv').collect(), 
+        ch_reports.collect().ifEmpty([]), 
+        CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect()
     )
-
-
-    ch_version_yaml = CUSTOM_DUMPSOFTWAREVERSIONS(ch_versions.unique().collectFile(name: 'versions.yml'))
-    ch_multiqc_files =  Channel.empty().mix(ch_version_yaml, ch_reports.collect().ifEmpty([]))
-
+    
     MULTIQC(ch_multiqc_files.collect(), [], [], [])
 }

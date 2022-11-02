@@ -18,8 +18,9 @@ process BWA_ALIGN_FROM_UBAM {
         path sa
         path ref_alt
     output:
-        tuple val(meta), path("${meta.id}.temp.bam"), emit: bam
-        path "versions.yml"                         , emit: versions
+        tuple val(meta), path("${meta.id}.alg.bam"), emit: bam
+        path "multiqc_rename.tsv"                  , emit: multiqc_rename
+        path "versions.yml"                        , emit: versions
 
     shell:
     def args = task.ext.args ?: ''
@@ -47,7 +48,7 @@ process BWA_ALIGN_FROM_UBAM {
             ATTRIBUTES_TO_REMOVE=MD \
             ALIGNED_BAM=/dev/stdin \
             UNMAPPED_BAM=${reads_ubam} \
-            OUTPUT=${meta.id}.temp.bam \
+            OUTPUT=${meta.id}.alg.bam \
             REFERENCE_SEQUENCE=${fasta} \
             SORT_ORDER="unsorted" \
             IS_BISULFITE_SEQUENCE=false \
@@ -62,6 +63,7 @@ process BWA_ALIGN_FROM_UBAM {
             UNMAP_CONTAMINANT_READS=true \
             ADD_PG_TAG_TO_READS=false
 
+    echo -e "${meta.id}.alg\t${meta.id}" > multiqc_rename.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

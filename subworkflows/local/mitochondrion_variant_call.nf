@@ -107,4 +107,5 @@ workflow variant_call {
         mutect_vcf         = GATK4_FILTERMUTECTCALLS.out.vcf.join(GATK4_FILTERMUTECTCALLS.out.tbi)     // channel: [ val(sample_id), vcf, tbi ]
         reports            = ch_reports
         versions           = ch_versions
+        multiqc_rename     = CALL_DEFAULT.out.multiqc_rename
 }

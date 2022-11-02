@@ -62,11 +62,12 @@ workflow CALL_VARIANTS {
         ch_versions = ch_versions.mix(GATK4_MUTECT2.out.versions)
 
     emit:
-        alignment    = mutect_inputs                               // channel: [ val(meta), bam, bai ]
-        dup_metrics  = PICARD_MARKDUPLICATES.out.metrics           // channel: [ val(meta), metrics ]
-        mutect_stats = GATK4_MUTECT2.out.stats                     // channel: [ val(meta), stats ]
-        pdf_metrics  = PICARD_COLLECTMULTIPLEMETRICS.out.pdf
-        txt_metrics  = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
-        vcf          = GATK4_MUTECT2.out.vcf                       // channel: [ val(meta), vcf, tbi ]
-        versions     = ch_versions                                 // channel: [ versions.yml ]
+        alignment      = mutect_inputs                               // channel: [ val(meta), bam, bai ]
+        dup_metrics    = PICARD_MARKDUPLICATES.out.metrics           // channel: [ val(meta), metrics ]
+        mutect_stats   = GATK4_MUTECT2.out.stats                     // channel: [ val(meta), stats ]
+        pdf_metrics    = PICARD_COLLECTMULTIPLEMETRICS.out.pdf
+        txt_metrics    = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
+        vcf            = GATK4_MUTECT2.out.vcf                       // channel: [ val(meta), vcf, tbi ]
+        versions       = ch_versions                                 // channel: [ versions.yml ]
+        multiqc_rename = ALIGN_MITO.out.multiqc_rename               // channel: [ multiqc_rename.tsv ]
 }

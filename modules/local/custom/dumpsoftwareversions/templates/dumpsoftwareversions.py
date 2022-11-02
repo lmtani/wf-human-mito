@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# TODO: use the oficial module
 
 """Provide functions to merge multiple versions.yml files."""
 
@@ -76,13 +76,12 @@ def main():
 
     versions_by_module["Workflow"] = {
         "Nextflow": "$workflow.nextflow.version",
-        "$workflow.manifest.name": "$workflow.manifest.version",
     }
 
     versions_mqc = {
         "id": "software_versions",
-        "section_name": "${workflow.manifest.name} Software Versions",
-        "section_href": "https://github.com/${workflow.manifest.name}",
+        "section_name": "Software Versions",
+        "section_href": "https://github.com/lmtani/wf-human-mito",
         "plot_type": "html",
         "description": "are collected at run time from the software output.",
         "data": _make_versions_html(versions_by_module),
