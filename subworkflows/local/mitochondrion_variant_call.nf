@@ -17,7 +17,9 @@ include { MOSDEPTH                         } from '../../modules/nf-core/mosdept
 
 workflow variant_call {
     take:
-        reads  // channel: [ val(meta), ubam ]
+        reads           // channel: [ val(meta), ubam ]
+        standard_genome // channel: [ fasta, dict, index, amb, ann, bwt, pac, sa, alt ]
+        shifted_genome  // channel: [ fasta, dict, index, amb, ann, bwt, pac, sa, alt ]
     main:
 
         // To gather all QC reports for MultiQC
@@ -26,36 +28,10 @@ workflow variant_call {
         // To gather used softwares versions for MultiQC
         ch_versions = Channel.empty()
 
-        CALL_DEFAULT(
-            reads,
-            " -L chrM:576-16024 ",
-            "standard",
-            params.genome.mito_fasta,
-            params.genome.mito_dict,
-            params.genome.mito_index,
-            params.genome.mito_amb,
-            params.genome.mito_ann,
-            params.genome.mito_bwt,
-            params.genome.mito_pac,
-            params.genome.mito_sa,
-            params.genome.mito_fake_alt,
-        )
+        CALL_DEFAULT(reads, " -L chrM:576-16024 ", "standard", standard_genome)
         ch_versions = ch_versions.mix(CALL_DEFAULT.out.versions)
 
-        CALL_SHIFTED(
-            reads,
-            " -L chrM:8025-9144 ",
-            "shifted",
-            params.genome.shifted_fasta,
-            params.genome.shifted_dict,
-            params.genome.shifted_index,
-            params.genome.shifted_amb,
-            params.genome.shifted_ann,
-            params.genome.shifted_bwt,
-            params.genome.shifted_pac,
-            params.genome.shifted_sa,
-            params.genome.mito_fake_alt,
-        )
+        CALL_SHIFTED(reads, " -L chrM:8025-9144 ", "shifted", shifted_genome)
         ch_versions = ch_versions.mix(CALL_SHIFTED.out.versions)
 
         PICARD_LIFTOVERVCF(CALL_SHIFTED.out.vcf, params.genome.mito_dict, params.genome.shift_back_chain, params.genome.mito_fasta)

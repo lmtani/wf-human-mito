@@ -11,41 +11,20 @@ include { SAMTOOLS_INDEX                     } from '../../modules/nf-core/samto
 
 workflow CALL_VARIANTS {
     take:
-        reads     // channel: [ val(meta), ubam ]
-        interval  // channel: val(interval)
-        prefix    // channel: val(name)
-        fasta
-        fasta_dict
-        fasta_fai
-        fasta_amb
-        fasta_ann
-        fasta_bwt
-        fasta_pac
-        fasta_sa
-        fasta_alt
+        reads             // channel: [ val(meta), ubam ]
+        interval          // channel: val(interval)
+        prefix            // channel: val(name)
+        reference_genome  // channel: [ fasta, dict, index, amb, ann, bwt, pac, sa, alt ]
 
     main:
-        // To gather all QC reports for MultiQC
+        // To gather all QC reports and versions for MultiQC
         ch_reports  = Channel.empty()
-
-        // To gather used softwares versions for MultiQC
         ch_versions = Channel.empty()
 
-        ALIGN_MITO(
-                reads,
-                fasta,
-                fasta_dict,
-                fasta_fai,
-                fasta_amb,
-                fasta_ann,
-                fasta_bwt,
-                fasta_pac,
-                fasta_sa,
-                fasta_alt
-        )
+        ALIGN_MITO(reads, reference_genome)
         ch_versions = ch_versions.mix(ALIGN_MITO.out.versions)
 
-        PICARD_MARKDUPLICATES(ALIGN_MITO.out.bam, fasta, fasta_fai)
+        PICARD_MARKDUPLICATES(ALIGN_MITO.out.bam, reference_genome[0], reference_genome[2])
         ch_versions = ch_versions.mix(PICARD_MARKDUPLICATES.out.versions)
 
         PICARD_SORTSAM(PICARD_MARKDUPLICATES.out.bam, "coordinate")
@@ -54,11 +33,11 @@ workflow CALL_VARIANTS {
         SAMTOOLS_INDEX(PICARD_SORTSAM.out.bam)
         ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
 
-        PICARD_COLLECTMULTIPLEMETRICS(PICARD_SORTSAM.out.bam, fasta, fasta_fai)
+        PICARD_COLLECTMULTIPLEMETRICS(PICARD_SORTSAM.out.bam, reference_genome[0], reference_genome[2])
         ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions)
 
         mutect_inputs = PICARD_SORTSAM.out.bam.join(SAMTOOLS_INDEX.out.bai).map{ it -> [ it[0], it[1], it[2], [] ] }
-        GATK4_MUTECT2(mutect_inputs, fasta, fasta_fai, fasta_dict, [], [], [], [])
+        GATK4_MUTECT2(mutect_inputs, reference_genome[0], reference_genome[2], reference_genome[1], [], [], [], [])
         ch_versions = ch_versions.mix(GATK4_MUTECT2.out.versions)
 
     emit:

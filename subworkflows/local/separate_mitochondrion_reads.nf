@@ -26,6 +26,7 @@ workflow separate_mitochondrion {
         sa    = file("${params.reference}.64.sa", type:'file', checkIfExists:true)
         pac   = file("${params.reference}.64.pac", type:'file', checkIfExists:true)
         alt   = file("${params.reference}.64.alt", type:'file', checkIfExists:true)
+        human_reference_genome = [ fasta, dict, index, amb, ann, bwt, sa, pac, alt]
 
         ch_versions = Channel.empty()
 
@@ -35,7 +36,7 @@ workflow separate_mitochondrion {
         GATK4_FASTQTOSAM(sample)
         ch_versions = ch_versions.mix(GATK4_FASTQTOSAM.out.versions)
 
-        ALIGN_RAW_READS(GATK4_FASTQTOSAM.out.bam, fasta, dict, index, amb, ann, bwt, pac, sa, alt)
+        ALIGN_RAW_READS(GATK4_FASTQTOSAM.out.bam, human_reference_genome)
         ch_versions = ch_versions.mix(ALIGN_RAW_READS.out.versions)
 
         PICARD_SORTSAM(ALIGN_RAW_READS.out.bam, "coordinate")

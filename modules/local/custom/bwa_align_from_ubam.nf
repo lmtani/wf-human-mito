@@ -8,15 +8,7 @@ process BWA_ALIGN_FROM_UBAM {
 
     input:
         tuple val(meta), path(ubam)
-        path fasta
-        path dict
-        path index
-        path amb
-        path ann
-        path bwt
-        path pac
-        path sa
-        path ref_alt
+        tuple path(fasta), path(dict), path(index), path(amb), path(ann), path(bwt), path(pac), path(sa), path(alt)
     output:
         tuple val(meta), path("${meta.id}.alg.bam"), emit: bam
         path "multiqc_rename.tsv"                  , emit: multiqc_rename

@@ -52,6 +52,31 @@ workflow {
     ch_versions = Channel.empty()
     ch_multiqc_files =  Channel.empty()
 
+    // Mitochondrial reference genomes
+    standard_genome = [             
+        params.genome.mito_fasta,
+        params.genome.mito_dict,
+        params.genome.mito_index,
+        params.genome.mito_amb,
+        params.genome.mito_ann,
+        params.genome.mito_bwt,
+        params.genome.mito_pac,
+        params.genome.mito_sa,
+        params.genome.mito_fake_alt
+    ]
+
+    shifted_genome = [
+        params.genome.shifted_fasta,
+        params.genome.shifted_dict,
+        params.genome.shifted_index,
+        params.genome.shifted_amb,
+        params.genome.shifted_ann,
+        params.genome.shifted_bwt,
+        params.genome.shifted_pac,
+        params.genome.shifted_sa,
+        params.genome.mito_fake_alt
+    ]
+
     if (params.fastq) {
         reads = Channel.fromFilePairs("${params.fastq}", glob: true)
     }
@@ -64,7 +89,7 @@ workflow {
     separate_mitochondrion(reads, alignments, params.restore_hardclips)
     ch_versions = ch_versions.mix(separate_mitochondrion.out.versions)
 
-    variant_call(separate_mitochondrion.out.bam)
+    variant_call(separate_mitochondrion.out.bam, standard_genome, shifted_genome)
     ch_versions = ch_versions.mix(variant_call.out.versions)
     ch_reports = ch_versions.mix(variant_call.out.reports)
 
