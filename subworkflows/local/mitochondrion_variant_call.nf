@@ -5,7 +5,7 @@
 include {
           CALL_VARIANTS as CALL_DEFAULT;
           CALL_VARIANTS as CALL_SHIFTED    } from '../../subworkflows/local/mutect2_variant_call.nf'
-include { GATK4_FILTERMUTECTCALLS          } from '../../modules/nf-core/gatk4/filtermutectcalls/main'
+include { GATK4_FILTERMUTECTCALLS          } from '../../modules/local/gatk4/filtermutectcalls/main'
 include { GATK4_LEFTALIGNANDTRIMVARIANTS   } from '../../modules/nf-core/gatk4/leftalignandtrimvariants/main'
 include { GATK4_MERGEMUTECTSTATS           } from '../../modules/nf-core/gatk4/mergemutectstats/main'
 include { GATK4_SELECTVARIANTS             } from '../../modules/nf-core/gatk4/selectvariants/main'
