@@ -4,22 +4,22 @@
 //
 include {
           CALL_VARIANTS as CALL_DEFAULT;
-          CALL_VARIANTS as CALL_SHIFTED    } from '../../subworkflows/local/mutect2_variant_call.nf'
-include { GATK4_FILTERMUTECTCALLS          } from '../../modules/local/gatk4/filtermutectcalls/main'
-include { GATK4_LEFTALIGNANDTRIMVARIANTS   } from '../../modules/nf-core/gatk4/leftalignandtrimvariants/main'
-include { GATK4_MERGEMUTECTSTATS           } from '../../modules/nf-core/gatk4/mergemutectstats/main'
-include { GATK4_SELECTVARIANTS             } from '../../modules/nf-core/gatk4/selectvariants/main'
-include { GATK4_VARIANTFILTRATION          } from '../../modules/nf-core/gatk4/variantfiltration/main'
-include { HAPLOCHECK                       } from '../../modules/nf-core/haplocheck/main'
-include { MERGE_VCFS                       } from '../../modules/local/picard/merge_vcfs.nf'
-include { PICARD_LIFTOVERVCF               } from '../../modules/nf-core/picard/liftovervcf/main'
-include { MOSDEPTH                         } from '../../modules/nf-core/mosdepth/main'
+          CALL_VARIANTS as CALL_SHIFTED        } from '../../subworkflows/local/mutect2_variant_call.nf'
+include { GATK4_FILTERMUTECTCALLS              } from '../../modules/local/gatk4/filtermutectcalls/main'
+include { GATK4_LEFTALIGNANDTRIMVARIANTS       } from '../../modules/nf-core/gatk4/leftalignandtrimvariants/main'
+include { GATK4_MERGEMUTECTSTATS               } from '../../modules/nf-core/gatk4/mergemutectstats/main'
+include { GATK4_SELECTVARIANTS                 } from '../../modules/nf-core/gatk4/selectvariants/main'
+include { GATK4_VARIANTFILTRATION              } from '../../modules/nf-core/gatk4/variantfiltration/main'
+include { HAPLOCHECK                           } from '../../modules/nf-core/haplocheck/main'
+include { MERGE_VCFS                           } from '../../modules/local/picard/merge_vcfs.nf'
+include { PICARD_LIFTOVERVCF                   } from '../../modules/nf-core/picard/liftovervcf/main'
+include { MOSDEPTH                             } from '../../modules/nf-core/mosdepth/main'
 
 workflow variant_call {
     take:
         reads           // channel: [ val(meta), ubam ]
-        standard_genome // channel: [ fasta, dict, index, amb, ann, bwt, pac, sa, alt ]
-        shifted_genome  // channel: [ fasta, dict, index, amb, ann, bwt, pac, sa, alt ]
+        standard_genome // channel: [ fasta, dict, index, amb, ann, bwt, pac, sa, alt, intervals ]
+        shifted_genome  // channel: [ fasta, dict, index, amb, ann, bwt, pac, sa, alt, intervals ]
     main:
 
         // To gather all QC reports for MultiQC

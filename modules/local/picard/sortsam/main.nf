@@ -12,8 +12,9 @@ process PICARD_SORTSAM {
     val sort_order
 
     output:
-    tuple val(meta), path("*.bam"), emit: bam
-    path "versions.yml"           , emit: versions
+    tuple val(meta), path("*.bam"), path('*.bai')   , emit: bam
+    path "versions.yml"                             , emit: versions
+    
 
     when:
     task.ext.when == null || task.ext.when
@@ -33,7 +34,8 @@ process PICARD_SORTSAM {
         -Xmx${avail_mem}g \\
         --INPUT $bam \\
         --OUTPUT ${prefix}.bam \\
-        --SORT_ORDER $sort_order
+        --SORT_ORDER $sort_order \\
+        --CREATE_INDEX
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -4,9 +4,8 @@
 //
 include { BWA_ALIGN_FROM_UBAM as ALIGN_RAW_READS  } from '../../modules/local/custom/bwa_align_from_ubam.nf'
 include { GATK4_FASTQTOSAM                        } from '../../modules/nf-core/gatk4/fastqtosam/main'
-include { PICARD_SORTSAM                          } from '../../modules/nf-core/picard/sortsam/main'
+include { PICARD_SORTSAM                          } from '../../modules/local/picard/sortsam/main'
 include { PRINT_READS                             } from '../../modules/local/gatk/print_reads.nf'
-include { SAMTOOLS_INDEX                          } from '../../modules/nf-core/samtools/index/main'
 include { SELECT_MITO_READS                       } from '../../modules/local/picard/revert_sam.nf'
 
 
@@ -42,14 +41,8 @@ workflow separate_mitochondrion {
         PICARD_SORTSAM(ALIGN_RAW_READS.out.bam, "coordinate")
         ch_versions = ch_versions.mix(PICARD_SORTSAM.out.versions)
 
-        SAMTOOLS_INDEX(PICARD_SORTSAM.out.bam)
-        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
-
-        // Join the mapped bam + bai paths by their keys
-        bam_sorted_indexed = PICARD_SORTSAM.out.bam.join(SAMTOOLS_INDEX.out.bai)
-
         // Add provided alignments to the reads channel
-        mito_reads_ch = bam_sorted_indexed.mix(alignments)
+        mito_reads_ch = PICARD_SORTSAM.out.bam.mix(alignments)
 
         PRINT_READS(mito_reads_ch, fasta, index, dict)
         ch_versions = ch_versions.mix(PRINT_READS.out.versions)

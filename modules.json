@@ -56,14 +56,6 @@
                     "picard/markduplicates": {
                         "branch": "master",
                         "git_sha": "eca65aa4a5e2e192ac44d6962c8f9260f314ffb8"
-                    },
-                    "picard/sortsam": {
-                        "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
-                    },
-                    "samtools/index": {
-                        "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
                     }
                 }
             }

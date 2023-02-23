@@ -62,7 +62,8 @@ workflow {
         params.genome.mito_bwt,
         params.genome.mito_pac,
         params.genome.mito_sa,
-        params.genome.mito_fake_alt
+        params.genome.mito_fake_alt,
+        params.genome.mito_intervals
     ]
 
     shifted_genome = [
@@ -74,7 +75,8 @@ workflow {
         params.genome.shifted_bwt,
         params.genome.shifted_pac,
         params.genome.shifted_sa,
-        params.genome.mito_fake_alt
+        params.genome.mito_fake_alt,
+        params.genome.shifted_interval
     ]
 
     if (params.fastq) {
