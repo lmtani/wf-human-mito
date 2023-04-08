@@ -76,6 +76,7 @@ workflow variant_call {
         ch_reports = ch_reports
                             .mix(CALL_DEFAULT.out.dup_metrics.map { it -> [ it[1] ]})
                             .mix(CALL_DEFAULT.out.txt_metrics.map{ it -> it[1] })
+                            .mix(HAPLOCHECK.out.txt.map{ it -> it[1] })
 
     emit:
         alignment          = CALL_DEFAULT.out.alignment                                                // channel: [ val(sample_id), bam, bai ]

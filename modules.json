@@ -7,55 +7,94 @@
                 "nf-core": {
                     "gatk4/fastqtosam": {
                         "branch": "master",
-                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67"
+                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "gatk4/filtermutectcalls": {
                         "branch": "master",
-                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67"
+                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "gatk4/leftalignandtrimvariants": {
                         "branch": "master",
-                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67"
+                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "gatk4/mergemutectstats": {
                         "branch": "master",
-                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67"
+                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "gatk4/mutect2": {
                         "branch": "master",
-                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67"
+                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "gatk4/selectvariants": {
                         "branch": "master",
-                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67"
+                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "gatk4/variantfiltration": {
                         "branch": "master",
-                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67"
+                        "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "haplocheck": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "mosdepth": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "picard/collectmultiplemetrics": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "picard/liftovervcf": {
                         "branch": "master",
-                        "git_sha": "3d5d18db1b39e1133505ae2fa2a062b0073c8a6a"
+                        "git_sha": "3d5d18db1b39e1133505ae2fa2a062b0073c8a6a",
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "picard/markduplicates": {
                         "branch": "master",
-                        "git_sha": "eca65aa4a5e2e192ac44d6962c8f9260f314ffb8"
+                        "git_sha": "eca65aa4a5e2e192ac44d6962c8f9260f314ffb8",
+                        "installed_by": [
+                            "modules"
+                        ]
                     }
                 }
             }
