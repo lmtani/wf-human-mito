@@ -3,3 +3,4 @@ work/
 .nextflow*
 test_data/
 test-output/
+.vscode
