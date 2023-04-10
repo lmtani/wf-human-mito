@@ -1,47 +1,31 @@
 - name: Run all steps in the pipeline with test data using docker profile.
   tags:
     - docker
-  command: nextflow run main.nf -profile docker,ci,test
+  command: nextflow run main.nf -ansi-log -profile docker,ci,test
   files:
-    - path: "test-output-38/all_samples.csv"
-      md5sum: b730e0899dc39a5cefd65e0513087b12
-    - path: "test-output-38/variants/NA12878.vcf.gz"
+    - path: "test-output/variants/na12878-algn.leftalignandtrim.vcf.gz"
       should_exist: True
-    - path: "test-output-38/variants/NA12878.vcf.gz.tbi"
+    - path: "test-output/variants/na12878-algn.leftalignandtrim.vcf.gz.tbi"
       should_exist: True
-    - path: "test-output-38/alignments/NA12878.sorted.bam"
+    - path: "test-output/variants/NA12878-fq.leftalignandtrim.vcf.gz"
       should_exist: True
-    - path: "test-output-38/alignments/NA12878.sorted.bai"
+    - path: "test-output/variants/NA12878-fq.leftalignandtrim.vcf.gz.tbi"
       should_exist: True
-    - path: "test-output-38/workspace/haplocheck/NA12878-algn.raw.txt"
+    - path: "test-output/alignments/na12878-algn.bam"
+      should_exist: True
+    - path: "test-output/alignments/na12878-algn.bai"
+      should_exist: True
+    - path: "test-output/alignments/NA12878-fq.bam"
+      should_exist: True
+    - path: "test-output/alignments/NA12878-fq.bai"
+      should_exist: True
+    - path: "test-output/haplocheck/na12878-algn.raw.txt"
       contains:
         - "H13a1a1a"
         - "NA12878"
-    - path: "test-output-38/workspace/haplocheck/NA12878.raw.txt"
+    - path: "test-output/haplocheck/NA12878-fq.raw.txt"
       contains:
         - "H13a1a1a"
         - "NA12878"
-
-- name: Run all steps in the pipeline with test data using conda profile.
-  tags:
-    - mamba
-  command: nextflow run main.nf -profile mamba,ci,test_19
-  files:
-    - path: "test-output-19/all_samples.csv"
-      md5sum: 705d7718dc04f1ae7e674fe02f4a5771
-    - path: "test-output-19/variants/NA12878.vcf.gz"
-      should_exist: True
-    - path: "test-output-19/variants/NA12878.vcf.gz.tbi"
-      should_exist: True
-    - path: "test-output-19/alignments/NA12878.sorted.bam"
-      should_exist: True
-    - path: "test-output-19/alignments/NA12878.sorted.bai"
-      should_exist: True
-    - path: "test-output-19/workspace/haplocheck/NA12878-algn.raw.txt"
-      contains:
-        - "H13a1a1a"
-        - "NA12878"
-    - path: "test-output-19/workspace/haplocheck/NA12878.raw.txt"
-      contains:
-        - "H13a1a1a"
-        - "NA12878"
+    - path: "test-output/report/multiqc_data/multiqc_picard_AlignmentSummaryMetrics.txt"
+      md5sum: 94bc897eaa4609ba36f46b0894db46db

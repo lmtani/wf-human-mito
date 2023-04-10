@@ -3,16 +3,16 @@
 // reads from mitochondrial genome.
 //
 include { BWA_ALIGN_FROM_UBAM as ALIGN_RAW_READS  } from '../../modules/local/custom/bwa_align_from_ubam.nf'
-include { GATK4_FASTQTOSAM                        } from '../../modules/local/gatk/fastq_to_sam.nf'
+include { GATK4_FASTQTOSAM                        } from '../../modules/nf-core/gatk4/fastqtosam/main'
+include { PICARD_SORTSAM                          } from '../../modules/local/picard/sortsam/main'
 include { PRINT_READS                             } from '../../modules/local/gatk/print_reads.nf'
 include { SELECT_MITO_READS                       } from '../../modules/local/picard/revert_sam.nf'
-include { SORT_SAM                                } from '../../modules/local/picard/sort_sam.nf'
 
 
 workflow separate_mitochondrion {
     take:
-        reads             // channel: [ val(sample_id), [ path(fq_r1), path(fq_r2) ] ]
-        alignments        // channel: [ val(sample_id), [ path(bam), path(bai) ] ]
+        reads             // channel: [ val(meta), [ path(fq_r1), path(fq_r2) ] ]
+        alignments        // channel: [ val(meta), [ path(bam), path(bai) ] ]
         restore_hardclips // channel: [ val(boolean) ]
     main:
         // Human Reference
@@ -25,16 +25,32 @@ workflow separate_mitochondrion {
         sa    = file("${params.reference}.64.sa", type:'file', checkIfExists:true)
         pac   = file("${params.reference}.64.pac", type:'file', checkIfExists:true)
         alt   = file("${params.reference}.64.alt", type:'file', checkIfExists:true)
+        human_reference_genome = [ fasta, dict, index, amb, ann, bwt, pac, sa, alt]
 
-        GATK4_FASTQTOSAM(reads)
-        ALIGN_RAW_READS(GATK4_FASTQTOSAM.out, fasta, dict, index, amb, ann, bwt, pac, sa, alt)
-        SORT_SAM(ALIGN_RAW_READS.out)
+        ch_versions = Channel.empty()
 
-        mito_reads_ch = SORT_SAM.out.mix(alignments)
+        // Create channel with 'meta' info
+        sample = reads.map( it -> { [ [id:it[0], single_end:false], [ file(it[1][0]), file(it[1][1]) ] ] } )
+
+        GATK4_FASTQTOSAM(sample)
+        ch_versions = ch_versions.mix(GATK4_FASTQTOSAM.out.versions)
+
+        ALIGN_RAW_READS(GATK4_FASTQTOSAM.out.bam, human_reference_genome)
+        ch_versions = ch_versions.mix(ALIGN_RAW_READS.out.versions)
+
+        PICARD_SORTSAM(ALIGN_RAW_READS.out.bam, "coordinate")
+        ch_versions = ch_versions.mix(PICARD_SORTSAM.out.versions)
+
+        // Add provided alignments to the reads channel
+        mito_reads_ch = PICARD_SORTSAM.out.bam.mix(alignments)
+
         PRINT_READS(mito_reads_ch, fasta, index, dict)
+        ch_versions = ch_versions.mix(PRINT_READS.out.versions)
 
-        SELECT_MITO_READS(PRINT_READS.out, fasta, dict, index, restore_hardclips)
+        SELECT_MITO_READS(PRINT_READS.out.bam, fasta, dict, index, restore_hardclips)
+        ch_versions = ch_versions.mix(SELECT_MITO_READS.out.versions)
 
     emit:
-        SELECT_MITO_READS.out  // channel: [ val(sample_id), ubam ]
+        bam      = SELECT_MITO_READS.out.bam  // channel: [ val(meta), ubam ]
+        versions = ch_versions                // channel: [ versions.yml ]
 }
