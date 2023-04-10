@@ -3,17 +3,29 @@
     - docker
   command: nextflow run main.nf -ansi-log -profile docker,ci,test
   files:
-    - path: "test-output/variants/na12878.leftalignandtrim.vcf.gz"
+    - path: "test-output/variants/na12878-algn.leftalignandtrim.vcf.gz"
       should_exist: True
-    - path: "test-output/variants/na12878.leftalignandtrim.vcf.gz.tbi"
+    - path: "test-output/variants/na12878-algn.leftalignandtrim.vcf.gz.tbi"
       should_exist: True
-    - path: "test-output/alignments/na12878.bam"
+    - path: "test-output/variants/NA12878-fq.leftalignandtrim.vcf.gz"
       should_exist: True
-    - path: "test-output/alignments/na12878.bai"
+    - path: "test-output/variants/NA12878-fq.leftalignandtrim.vcf.gz.tbi"
       should_exist: True
-    - path: "test-output/haplocheck/na12878.raw.txt"
+    - path: "test-output/alignments/na12878-algn.bam"
+      should_exist: True
+    - path: "test-output/alignments/na12878-algn.bai"
+      should_exist: True
+    - path: "test-output/alignments/NA12878-fq.bam"
+      should_exist: True
+    - path: "test-output/alignments/NA12878-fq.bai"
+      should_exist: True
+    - path: "test-output/haplocheck/na12878-algn.raw.txt"
+      contains:
+        - "H13a1a1a"
+        - "NA12878"
+    - path: "test-output/haplocheck/NA12878-fq.raw.txt"
       contains:
         - "H13a1a1a"
         - "NA12878"
     - path: "test-output/report/multiqc_data/multiqc_picard_AlignmentSummaryMetrics.txt"
-      md5sum: ac82487bf038f25afcf6d431d7f2adc7
+      md5sum: 94bc897eaa4609ba36f46b0894db46db
