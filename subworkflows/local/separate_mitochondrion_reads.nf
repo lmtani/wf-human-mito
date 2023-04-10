@@ -25,7 +25,7 @@ workflow separate_mitochondrion {
         sa    = file("${params.reference}.64.sa", type:'file', checkIfExists:true)
         pac   = file("${params.reference}.64.pac", type:'file', checkIfExists:true)
         alt   = file("${params.reference}.64.alt", type:'file', checkIfExists:true)
-        human_reference_genome = [ fasta, dict, index, amb, ann, bwt, sa, pac, alt]
+        human_reference_genome = [ fasta, dict, index, amb, ann, bwt, pac, sa, alt]
 
         ch_versions = Channel.empty()
 

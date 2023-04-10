@@ -20,7 +20,7 @@ workflow CALL_VARIANTS {
         ch_reports  = Channel.empty()
         ch_versions = Channel.empty()
 
-        ALIGN_MITO(reads, reference_genome)
+        ALIGN_MITO(reads, reference_genome.dropRight(1))  // intervals are not needed for the alignment
         ch_versions = ch_versions.mix(ALIGN_MITO.out.versions)
 
         PICARD_MARKDUPLICATES(ALIGN_MITO.out.bam, reference_genome[0], reference_genome[2])
