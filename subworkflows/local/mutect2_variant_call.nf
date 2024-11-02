@@ -37,7 +37,7 @@ workflow CALL_VARIANTS {
         ch_versions = ch_versions.mix(GATK4_MUTECT2.out.versions)
 
     emit:
-        alignment      = mutect_inputs                               // channel: [ val(meta), bam, bai ]
+        alignment      = mutect_inputs                               // channel: [ val(meta), bam, bai, intervals ]
         dup_metrics    = PICARD_MARKDUPLICATES.out.metrics           // channel: [ val(meta), metrics ]
         mutect_stats   = GATK4_MUTECT2.out.stats                     // channel: [ val(meta), stats ]
         pdf_metrics    = PICARD_COLLECTMULTIPLEMETRICS.out.pdf

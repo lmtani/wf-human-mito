@@ -79,7 +79,7 @@ workflow variant_call {
                             .mix(HAPLOCHECK.out.txt.map{ it -> it[1] })
 
     emit:
-        alignment          = CALL_DEFAULT.out.alignment                                                // channel: [ val(sample_id), bam, bai ]
+        alignment          = CALL_DEFAULT.out.alignment                                                // channel: [ val(sample_id), bam, bai, intervals ]
         contamination      = HAPLOCHECK.out.txt                                                        // channel: [ val(sample_id), contam ]
         mutect_vcf         = GATK4_FILTERMUTECTCALLS.out.vcf.join(GATK4_FILTERMUTECTCALLS.out.tbi)     // channel: [ val(sample_id), vcf, tbi ]
         reports            = ch_reports

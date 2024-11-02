@@ -1,10 +1,15 @@
 {
-  "name": "",
+  "name": "lmtani/wf-human-mito",
   "homePage": "",
   "repos": {
     "https://github.com/nf-core/modules.git": {
       "modules": {
         "nf-core": {
+          "eklipse": {
+            "branch": "master",
+            "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+            "installed_by": ["modules"]
+          },
           "gatk4/fastqtosam": {
             "branch": "master",
             "git_sha": "7578005a576f3ac1b0d4f10c037dde34cdedfb67",

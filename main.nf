@@ -8,6 +8,7 @@ include { variant_call                } from './subworkflows/local/mitochondrion
 include { make_report                 } from './subworkflows/local/make_report.nf'
 include { MULTIQC                     } from './modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from './modules/local/custom/dumpsoftwareversions/main'
+include { EKLIPSE                     } from './modules/nf-core/eklipse/main.nf'
 
 def helpMessage(){
     log.info """
@@ -106,6 +107,9 @@ workflow {
     variant_call(separate_mitochondrion.out.bam, standard_genome, shifted_genome)
     ch_versions = ch_versions.mix(variant_call.out.versions)
     ch_reports = ch_versions.mix(variant_call.out.reports)
+
+
+    EKLIPSE(variant_call.out.alignment.map{it -> [ it[0], it[1], it[2] ] }, params.genome.gb_ref)
 
     make_report(variant_call.out.contamination)
     
