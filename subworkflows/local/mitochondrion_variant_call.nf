@@ -53,9 +53,9 @@ workflow variant_call {
         GATK4_MERGEMUTECTSTATS(stats_channel)
         ch_versions = ch_versions.mix(GATK4_MERGEMUTECTSTATS.out.versions)
 
-        filter_variants_channel = MERGE_VCFS.out.vcf.join(MERGE_VCFS.out.idx).join(GATK4_MERGEMUTECTSTATS.out.stats).map( it ->
+        filter_variants_channel = MERGE_VCFS.out.vcf.join(MERGE_VCFS.out.idx).join(GATK4_MERGEMUTECTSTATS.out.stats).map { it ->
             [ it[0], it[1], it[2], it[3], [], [], [], [] ]
-        )
+        }
         GATK4_FILTERMUTECTCALLS(filter_variants_channel, params.genome.mito_fasta, params.genome.mito_index, params.genome.mito_dict)
         ch_versions = ch_versions.mix(GATK4_FILTERMUTECTCALLS.out.versions)
 
@@ -63,7 +63,7 @@ workflow variant_call {
         GATK4_VARIANTFILTRATION(variantfiltration_channel, params.genome.mito_fasta, params.genome.mito_index, params.genome.mito_dict)
         ch_versions = ch_versions.mix(GATK4_VARIANTFILTRATION.out.versions)
 
-        left_align_channel = GATK4_VARIANTFILTRATION.out.vcf.join(GATK4_VARIANTFILTRATION.out.tbi).map( it -> [ it[0], it[1], it[2], []] )
+        left_align_channel = GATK4_VARIANTFILTRATION.out.vcf.join(GATK4_VARIANTFILTRATION.out.tbi).map { it -> [ it[0], it[1], it[2], []] }
         GATK4_LEFTALIGNANDTRIMVARIANTS(left_align_channel, params.genome.mito_fasta, params.genome.mito_index, params.genome.mito_dict)
         ch_versions = ch_versions.mix(GATK4_LEFTALIGNANDTRIMVARIANTS.out.versions)
 

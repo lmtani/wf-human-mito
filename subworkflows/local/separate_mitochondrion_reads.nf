@@ -30,7 +30,7 @@ workflow separate_mitochondrion {
         ch_versions = Channel.empty()
 
         // Create channel with 'meta' info
-        sample = reads.map( it -> { [ [id:it[0], single_end:false], [ file(it[1][0]), file(it[1][1]) ] ] } )
+        sample = reads.map { it -> [ [id:it[0], single_end:false], [ file(it[1][0]), file(it[1][1]) ] ] }
 
         GATK4_FASTQTOSAM(sample)
         ch_versions = ch_versions.mix(GATK4_FASTQTOSAM.out.versions)

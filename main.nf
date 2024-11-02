@@ -26,6 +26,18 @@ def helpMessage(){
 }
 
 
+def validateParams() {
+    if ((!params.fastq) && (!params.alignments)) {
+        log.error "`--fastq` or `--alignments` is required"
+        exit 1
+    }
+    if (!params.reference) {
+        log.error "`--reference` is required"
+        exit 1
+    }
+}
+
+
 workflow {
 
     if (params.help) {
@@ -83,9 +95,9 @@ workflow {
         reads = Channel.fromFilePairs("${params.fastq}", glob: true)
     }
     if (params.alignments) {
-        alignments = Channel.fromFilePairs("${params.alignments}", glob: true, flat: true).map( it ->
+        alignments = Channel.fromFilePairs("${params.alignments}", glob: true, flat: true).map { it ->
             [ [id: it[0]], it[2], it[1] ]
-        )
+        }
     }
 
     separate_mitochondrion(reads, alignments, params.restore_hardclips)
