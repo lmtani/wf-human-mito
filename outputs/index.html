@@ -1,0 +1,631 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../inputs/">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.43">
+    
+    
+      
+        <title>Explaining the outputs - Human Mitochondrial Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.0253249f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#explaining-the-outputs" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Human Mitochondrial Analysis" class="md-header__button md-logo" aria-label="Human Mitochondrial Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Human Mitochondrial Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Explaining the outputs
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="purple" data-md-color-accent="orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Human Mitochondrial Analysis" class="md-nav__button md-logo" aria-label="Human Mitochondrial Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Human Mitochondrial Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quickstart
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../inputs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Required inputs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Explaining the outputs
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Explaining the outputs
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#bam-and-vcf-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      BAM and VCF files
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-csv-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      The CSV file
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The CSV file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from-markduplicates-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      From MarkDuplicates process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-collectwgsmetrics-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      From CollectWgsMetrics process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-mtdnaserver-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      From mtDnaServer process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-collectalignmentsummarymetrics-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      From CollectAlignmentSummaryMetrics process
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#bam-and-vcf-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      BAM and VCF files
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-csv-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      The CSV file
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The CSV file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from-markduplicates-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      From MarkDuplicates process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-collectwgsmetrics-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      From CollectWgsMetrics process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-mtdnaserver-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      From mtDnaServer process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-collectalignmentsummarymetrics-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      From CollectAlignmentSummaryMetrics process
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="explaining-the-outputs">📦 Explaining the outputs<a class="headerlink" href="#explaining-the-outputs" title="Permanent link">&para;</a></h1>
+<h2 id="bam-and-vcf-files">BAM and VCF files<a class="headerlink" href="#bam-and-vcf-files" title="Permanent link">&para;</a></h2>
+<p>Each sample will have an output of:</p>
+<ul>
+<li>the alignment (BAM) between its sequencing reads and the mitochondrion genome</li>
+<li>the variants (VCF) found by using the Mutect2 program.</li>
+</ul>
+<h2 id="the-csv-file">The CSV file<a class="headerlink" href="#the-csv-file" title="Permanent link">&para;</a></h2>
+<p>This output has many data that can be useful in different ways.</p>
+<blockquote>
+<p>I've copy-paste some outputs definitions from <a href="https://broadinstitute.github.io/picard/picard-metric-definitions.html">Picard documentation</a> and from <a href="https://mitoverse.readthedocs.io/haplocheck/haplocheck/#minor-heteroplasmy-level">Haplockeck</a> here for convenience.</p>
+</blockquote>
+<h3 id="from-markduplicates-process">From MarkDuplicates process<a class="headerlink" href="#from-markduplicates-process" title="Permanent link">&para;</a></h3>
+<p><mark>SampleID</mark>: sample name</p>
+<p><mark>LIBRARY</mark>: sample name (parsed from filename) and the barcode (from inside FASTQ file)</p>
+<p><mark>UNPAIRED_READS_EXAMINED</mark>: This is the number of mapped reads examined which did not have a mapped mate pair.</p>
+<p><mark>READ_PAIRS_EXAMINED</mark>: This is the number of mapped reads examined.</p>
+<p><mark>SECONDARY_OR_SUPPLEMENTARY_RDS</mark>: The number of reads that were either secondary or supplementary</p>
+<p><mark>UNMAPPED_READS</mark>: The total number of unmapped reads examined</p>
+<p><mark>UNPAIRED_READ_DUPLICATES</mark>: The number of fragments that were marked as duplicates.</p>
+<p><mark>READ_PAIR_DUPLICATES</mark>: The number of read pairs that were marked as duplicates.</p>
+<p><mark>READ_PAIR_OPTICAL_DUPLICATES</mark>: The number of read pairs duplicates that were caused by optical duplication. Value is always &lt; READ_PAIR_DUPLICATES, which counts all duplicates regardless of source.</p>
+<p><mark>PERCENT_DUPLICATION</mark>: The fraction of mapped sequence that is marked as duplicate.</p>
+<p><mark>ESTIMATED_LIBRARY_SIZE</mark>: The estimated number of unique molecules in the library based on PE duplication.</p>
+<h3 id="from-collectwgsmetrics-process">From CollectWgsMetrics process<a class="headerlink" href="#from-collectwgsmetrics-process" title="Permanent link">&para;</a></h3>
+<p><mark>GENOME_TERRITORY</mark>: The number of non-N bases in the genome reference over which coverage will be evaluated.</p>
+<p><mark>MEAN_COVERAGE</mark>: The mean coverage in bases of the genome territory, after all filters are applied.</p>
+<p><mark>SD_COVERAGE</mark>: The standard deviation of coverage of the genome after all filters are applied.</p>
+<p><mark>MEDIAN_COVERAGE</mark>: The median coverage in bases of the genome territory, after all filters are applied.</p>
+<p><mark>MAD_COVERAGE</mark>: The median absolute deviation of coverage of the genome after all filters are applied.</p>
+<p><mark>PCT_EXC_ADAPTER</mark>:</p>
+<p><mark>PCT_EXC_MAPQ</mark>: The fraction of aligned bases that were filtered out because they were in reads with low mapping quality (default is &lt; 20).</p>
+<p><mark>PCT_EXC_DUPE</mark>: The fraction of aligned bases that were filtered out because they were in reads marked as duplicates.</p>
+<p><mark>PCT_EXC_UNPAIRED</mark>: The fraction of aligned bases that were filtered out because they were in reads without a mapped mate pair.</p>
+<p><mark>PCT_EXC_BASEQ</mark>: The fraction of aligned bases that were filtered out because they were of low base quality (default is &lt; 20).</p>
+<p><mark>PCT_EXC_OVERLAP</mark>: The fraction of aligned bases that were filtered out because they were the second observation from an insert with overlapping reads.</p>
+<p><mark>PCT_EXC_CAPPED</mark>: The fraction of aligned bases that were filtered out because they would have raised coverage above the capped value (default cap = 250x).</p>
+<p><mark>PCT_EXC_TOTAL</mark>: The total fraction of aligned bases excluded due to all filters.</p>
+<p><mark>PCT_1X -&gt; PCT_100X</mark>: The fraction of bases that attained at least 1X (5X, 10X...) sequence coverage in post-filtering bases.</p>
+<p><mark>FOLD_80_BASE_PENALTY</mark>: The fold over-coverage necessary to raise 80% of bases in "non-zero-cvg" targets to the mean coverage level in those targets.</p>
+<p><mark>FOLD_90_BASE_PENALTY</mark>: Similar to above</p>
+<p><mark>FOLD_95_BASE_PENALTY</mark>:</p>
+<p><mark>HET_SNP_SENSITIVITY</mark>: The theoretical HET SNP sensitivity.</p>
+<p><mark>HET_SNP_Q</mark>: The Phred Scaled Q Score of the theoretical HET SNP sensitivity.</p>
+<h3 id="from-mtdnaserver-process">From mtDnaServer process<a class="headerlink" href="#from-mtdnaserver-process" title="Permanent link">&para;</a></h3>
+<p>Contamination:</p>
+<p><mark>SampleHomoplasmies</mark>:</p>
+<p><mark>SampleHeteroplasmies</mark></p>
+<p><mark>SampleMeanCoverage</mark>: defines the mean coverage for the sample.</p>
+<p><mark>HgMajor</mark></p>
+<p><mark>HgQualityMajor</mark></p>
+<p><mark>HgMinor</mark></p>
+<p><mark>HgQualityMinor</mark></p>
+<p><mark>HomoplasmiesMajor</mark></p>
+<p><mark>HomoplasmiesMinor</mark></p>
+<p><mark>HeteroplasmiesMajor</mark></p>
+<p><mark>HeteroplasmiesMinor</mark></p>
+<p><mark>MeanHetLevelMajor</mark>: The major haplogroup is calculated by using Haplogrep. The input profile includes all homoplasmies and the major component of each heteroplasmy.</p>
+<p><mark>MeanHetLevelMinor</mark>: The minor heteroplasmy level is calculated by averaging the level of the minor component of each heteroplasmy. The sample HG00245 includes two minor components (3010A (0.011), 16356C (0.012)) to calculate the final heteroplasmy level of 0.011.</p>
+<p><mark>HG_Distance</mark>: This column defines the distance between the haplogroups of the major and minor profile using the graph structure of Phylotree 17</p>
+<h3 id="from-collectalignmentsummarymetrics-process">From CollectAlignmentSummaryMetrics process<a class="headerlink" href="#from-collectalignmentsummarymetrics-process" title="Permanent link">&para;</a></h3>
+<p><mark>CATEGORY</mark>: Just being explicity that te reads metrics are only considering paired-end alignments</p>
+<p><mark>TOTAL_READS</mark>: Total of reads in the alignment</p>
+<p><mark>PF_READS</mark>: The total number of reads passing filter (PF), where the filter(s) can be platform/vendor quality controls</p>
+<p><mark>PCT_PF_READS</mark>: The fraction of reads passing filter, PF_READS/TOTAL_READS</p>
+<p><mark>PF_NOISE_READS</mark>: The number of PF reads that are marked as noise reads. A noise read is one which is composed entirely of A bases and/or N bases. These reads are marked as they are usually artifactual and are of no use in downstream analysis.</p>
+<p><mark>PF_READS_ALIGNED</mark>:</p>
+<p><mark>PCT_PF_READS_ALIGNED</mark>: The percentage of PF reads that aligned to the reference sequence. PF_READS_ALIGNED / PF_READS</p>
+<p><mark>PF_ALIGNED_BASES</mark>: The total number of aligned bases, in all mapped PF reads, that are aligned to the reference sequence.</p>
+<p><mark>PF_HQ_ALIGNED_READS</mark>: The number of PF reads that were aligned to the reference sequence with a mapping quality of Q20 or higher signifying that the aligner estimates a 1/100 (or smaller) chance that the alignment is wrong.</p>
+<p><mark>PF_HQ_ALIGNED_BASES</mark>: The number of bases aligned to the reference sequence in reads that were mapped at high quality. Will usually approximate PF_HQ_ALIGNED_READS * READ_LENGTH but may differ when either mixed read lengths are present or many reads are aligned with gaps.</p>
+<p><mark>PF_HQ_ALIGNED_Q20_BASES</mark>: The subset of PF_HQ_ALIGNED_BASES where the base call quality was Q20 or higher.</p>
+<p><mark>PF_HQ_MEDIAN_MISMATCHES</mark>: The median number of mismatches versus the reference sequence in reads that were aligned to the reference at high quality (i.e. PF_HQ_ALIGNED READS).</p>
+<p><mark>PF_MISMATCH_RATE</mark>: The rate of bases mismatching the reference for all bases aligned to the reference sequence.</p>
+<p><mark>PF_HQ_ERROR_RATE</mark>: The fraction of bases that mismatch the reference in PF HQ aligned reads.</p>
+<p><mark>PF_INDEL_RATE</mark>: The number of insertion and deletion events per 100 aligned bases. Uses the number of events as the numerator, not the number of inserted or deleted bases.</p>
+<p><mark>MEAN_READ_LENGTH</mark>: The mean read length of the set of reads examined. When looking at the data for a single lane with equal length reads this number is just the read length. When looking at data for merged lanes with differing read lengths this is the mean read length of all reads.</p>
+<p><mark>SD_READ_LENGTH</mark>: Standard deviation of the read length.</p>
+<p><mark>MEDIAN_READ_LENGTH</mark>: Median of the read length.</p>
+<p><mark>MAD_READ_LENGTH</mark>:</p>
+<p><mark>MIN_READ_LENGTH</mark>: Lenght of the shortest read</p>
+<p><mark>MAX_READ_LENGTH</mark>: Length of the longest read</p>
+<p><mark>READS_ALIGNED_IN_PAIRS</mark>: The number of aligned reads whose mate pair was also aligned to the reference.</p>
+<p><mark>PCT_READS_ALIGNED_IN_PAIRS</mark>: The fraction of reads whose mate pair was also aligned to the reference. READS_ALIGNED_IN_PAIRS / PF_READS_ALIGNED</p>
+<p><mark>PF_READS_IMPROPER_PAIRS</mark>: The number of (primary) aligned reads that are <strong>not</strong> "properly" aligned in pairs (as per SAM flag 0x2).</p>
+<p><mark>PCT_PF_READS_IMPROPER_PAIRS</mark>: The fraction of (primary) reads that are <em>not</em> "properly" aligned in pairs (as per SAM flag 0x2). PF_READS_IMPROPER_PAIRS / PF_READS_ALIGNED</p>
+<p><mark>BAD_CYCLES</mark>": The number of instrument cycles in which 80% or more of base calls were no-calls.</p>
+<p><mark>STRAND_BALANCE</mark>: The number of PF reads aligned to the positive strand of the genome divided by the number of PF reads aligned to the genome.</p>
+<p><mark>PCT_CHIMERAS</mark>: The fraction of reads that map outside of a maximum insert size (usually 100kb) or that have the two ends mapping to different chromosomes.</p>
+<p><mark>PCT_ADAPTER</mark>: The fraction of PF reads that are unaligned and match to a known adapter sequence right from the start of the read.</p>
+<p><mark>PCT_SOFTCLIP</mark>: the fraction of PF bases that are on (primary) aligned reads and are soft-clipped, as a fraction of the PF_ALIGNED_BASES (even though these are not aligned!)</p>
+<p><mark>PCT_HARDCLIP</mark>: The fraction of PF bases that are (on primary, aligned reads and) hard-clipped, as a fraction of the PF_ALIGNED_BASES (even though these are not aligned!)</p>
+<p><mark>AVG_POS_3PRIME_SOFTCLIP_LENGTH</mark>: The average length of the soft-clipped bases at the 3' end of reads.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+    
+  </body>
+</html>
